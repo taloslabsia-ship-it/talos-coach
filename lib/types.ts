@@ -34,7 +34,7 @@ export interface DiaryEntry {
   updatedAt: string;
 }
 
-export type NoteCategory = 'prompt' | 'idea' | 'compras' | 'trabajo' | 'personal';
+export type NoteCategory = 'pendiente' | 'prompt' | 'idea' | 'compras' | 'trabajo' | 'personal';
 
 export interface Note {
   id: string;
@@ -42,6 +42,7 @@ export interface Note {
   content: string;
   category: NoteCategory;
   source: string;       // 'manual' | 'talos'
+  completed?: boolean;  // solo aplica a categoría 'pendiente'
   createdAt: string;
   updatedAt: string;
 }

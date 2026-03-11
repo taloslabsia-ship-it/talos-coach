@@ -42,17 +42,28 @@ export function capitalize(s: string): string {
 }
 
 export const CATEGORY_COLORS: Record<string, string> = {
-  prompt:   'bg-purple-100 text-purple-700',
-  idea:     'bg-yellow-100 text-yellow-700',
-  compras:  'bg-green-100 text-green-700',
-  trabajo:  'bg-blue-100 text-blue-700',
-  personal: 'bg-pink-100 text-pink-700',
+  pendiente: 'bg-primary-500/10 text-primary-400 border border-primary-500/20',
+  prompt:    'bg-purple-500/10 text-purple-400 border border-purple-500/20',
+  idea:      'bg-amber-500/10 text-amber-400 border border-amber-500/20',
+  compras:   'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20',
+  trabajo:   'bg-blue-500/10 text-blue-400 border border-blue-500/20',
+  personal:  'bg-pink-500/10 text-pink-400 border border-pink-500/20',
 };
 
 export const CATEGORY_LABELS: Record<string, string> = {
-  prompt:   'Prompt',
-  idea:     'Idea',
-  compras:  'Compras',
-  trabajo:  'Trabajo',
-  personal: 'Personal',
+  pendiente: '✅ Pendientes',
+  prompt:    '📋 Prompts',
+  idea:      '💡 Ideas',
+  compras:   '🛒 Compras',
+  trabajo:   '💼 Trabajo',
+  personal:  '👤 Personal',
+};
+
+export const CATEGORY_ICONS: Record<string, string> = {
+  pendiente: '✅',
+  prompt:    '📋',
+  idea:      '💡',
+  compras:   '🛒',
+  trabajo:   '💼',
+  personal:  '👤',
 };

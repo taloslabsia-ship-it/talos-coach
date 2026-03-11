@@ -37,3 +37,11 @@ export async function deleteNote(id: string) {
   await db.collection('notes').doc(id).delete();
   revalidatePath('/notes');
 }
+
+export async function toggleNoteCompleted(id: string, completed: boolean) {
+  await db.collection('notes').doc(id).update({
+    completed,
+    updatedAt: FieldValue.serverTimestamp(),
+  });
+  revalidatePath('/notes');
+}

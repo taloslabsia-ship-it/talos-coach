@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
   const { title, content, category = 'personal' } = body;
   if (!title || !content) return NextResponse.json({ error: 'Se requieren title y content' }, { status: 400 });
 
-  const validCategories = ['prompt', 'idea', 'compras', 'trabajo', 'personal'];
+  const validCategories = ['pendiente', 'prompt', 'idea', 'compras', 'trabajo', 'personal'];
   if (!validCategories.includes(category)) {
     return NextResponse.json({ error: `Categoría inválida. Opciones: ${validCategories.join(', ')}` }, { status: 400 });
   }
@@ -42,6 +42,7 @@ export async function POST(req: NextRequest) {
     content,
     category,
     source: 'talos',
+    completed: false,
     createdAt: FieldValue.serverTimestamp(),
     updatedAt: FieldValue.serverTimestamp(),
   });
