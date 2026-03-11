@@ -1,4 +1,4 @@
-import { db } from '@/lib/firebase';
+import { db, toISO } from '@/lib/firebase';
 import { toDateString } from '@/lib/utils';
 import { HabitCard } from '@/components/HabitCard';
 import type { Habit, HabitLog, HabitWithLog } from '@/lib/types';
@@ -12,12 +12,22 @@ async function getHabitsToday() {
     .where('active', '==', true)
     .orderBy('sortOrder')
     .get();
-  const habits = habitsSnap.docs.map(d => ({ id: d.id, ...d.data() } as Habit));
+  const habits = habitsSnap.docs.map(d => {
+    const data = d.data();
+    return { id: d.id, ...data, createdAt: toISO(data.createdAt) ?? '' } as Habit;
+  });
 
   const logsSnap = await db.collection('habit_logs')
     .where('date', '==', today)
     .get();
-  const logs = logsSnap.docs.map(d => ({ id: d.id, ...d.data() } as HabitLog));
+  const logs = logsSnap.docs.map(d => {
+    const data = d.data();
+    return {
+      id: d.id, ...data,
+      completedAt: toISO(data.completedAt),
+      createdAt: toISO(data.createdAt) ?? '',
+    } as HabitLog;
+  });
 
   return habits.map<HabitWithLog>(h => ({
     ...h,
