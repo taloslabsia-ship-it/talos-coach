@@ -1,0 +1,16 @@
+# Firebase App Hosting configuration
+# Docs: https://firebase.google.com/docs/app-hosting/configure
+
+runConfig:
+  cpu: 1
+  memoryMiB: 512
+  concurrency: 80
+  minInstances: 0
+  maxInstances: 2
+
+env:
+  - variable: TALOS_API_SECRET
+    secret: TALOS_API_SECRET
+    availability:
+      - BUILD
+      - RUNTIME
