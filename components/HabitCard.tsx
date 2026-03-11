@@ -25,48 +25,44 @@ export function HabitCard({ habit, date }: Props) {
   return (
     <div
       className={cn(
-        'card flex items-start gap-4 cursor-pointer select-none transition-all',
-        done ? 'border-green-800/60 bg-green-950/20' : 'hover:border-slate-700',
-        isPending && 'opacity-70'
+        'flex items-start gap-4 p-4 rounded-2xl border cursor-pointer select-none transition-all group',
+        done
+          ? 'border-primary-500/30 bg-primary-500/5'
+          : 'border-white/[0.06] bg-white/[0.03] hover:border-primary-500/20',
+        isPending && 'opacity-60'
       )}
       onClick={handleToggle}
     >
-      <span className="text-3xl mt-0.5">{habit.emoji}</span>
+      <span className="text-2xl mt-0.5">{habit.emoji}</span>
 
       <div className="flex-1">
-        <div className="flex items-center gap-2">
-          <p className={cn('font-semibold', done ? 'text-green-300 line-through decoration-green-600' : 'text-white')}>
+        <div className="flex items-center gap-2 flex-wrap">
+          <p className={cn('font-semibold', done ? 'text-primary-400 line-through decoration-primary-600' : 'text-white')}>
             {habit.name}
           </p>
           {habit.timeLabel && (
-            <span className="badge bg-slate-800 text-slate-400">{habit.timeLabel}</span>
+            <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest">{habit.timeLabel}</span>
           )}
         </div>
         {habit.description && (
           <p className="text-slate-500 text-sm mt-1">{habit.description}</p>
         )}
         {done && habit.log?.completedAt && (
-          <p className="text-green-600 text-xs mt-1">
-            Completado a las{' '}
-            {new Date(habit.log.completedAt).toLocaleTimeString('es-AR', {
-              hour: '2-digit',
-              minute: '2-digit',
-            })}
+          <p className="text-xs mt-1 font-mono" style={{ color: '#0df2f2', opacity: 0.7 }}>
+            ✓ {new Date(habit.log.completedAt).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })}
           </p>
         )}
       </div>
 
       <button
         className={cn(
-          'w-8 h-8 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all',
-          done
-            ? 'border-green-500 bg-green-500'
-            : 'border-slate-600 hover:border-brand-400'
+          'w-8 h-8 rounded-xl border-2 flex items-center justify-center flex-shrink-0 transition-all',
+          done ? 'border-primary-500 bg-primary-500 neon-glow-sm' : 'border-slate-600 group-hover:border-primary-500/50'
         )}
         onClick={(e) => { e.stopPropagation(); handleToggle(); }}
       >
         {done && (
-          <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg className="w-4 h-4" style={{ color: '#0a1414' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
           </svg>
         )}

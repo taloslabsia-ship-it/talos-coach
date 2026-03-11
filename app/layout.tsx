@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import { Sidebar } from '@/components/Sidebar';
+import { BottomNav } from '@/components/BottomNav';
 import { ServiceWorkerRegistration } from '@/components/ServiceWorkerRegistration';
 
 export const metadata: Metadata = {
@@ -15,7 +16,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: '#2563eb',
+  themeColor: '#0df2f2',
   width: 'device-width',
   initialScale: 1,
   maximumScale: 1,
@@ -27,12 +28,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="es">
       <body className="flex h-screen overflow-hidden">
         <ServiceWorkerRegistration />
+        {/* Desktop sidebar */}
         <Sidebar />
-        <main className="flex-1 overflow-y-auto bg-slate-950">
-          <div className="max-w-5xl mx-auto px-6 py-8">
+        {/* Main content */}
+        <main className="flex-1 overflow-y-auto">
+          <div className="max-w-2xl mx-auto px-4 py-6 pb-24 md:pb-8 md:px-6 md:py-8 md:max-w-5xl">
             {children}
           </div>
         </main>
+        {/* Mobile bottom nav */}
+        <BottomNav />
       </body>
     </html>
   );
