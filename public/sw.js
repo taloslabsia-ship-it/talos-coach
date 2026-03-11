@@ -1,4 +1,4 @@
-// TALOS Coach Service Worker
+// Asistente TALOS Service Worker
 // Minimal SW — enables PWA installability. No offline caching (app requires real-time Firestore data).
 
 const CACHE_NAME = 'talos-coach-v1';

@@ -24,7 +24,7 @@ export function Sidebar() {
           <span className="text-2xl">⚡</span>
           <div>
             <p className="text-white font-bold text-sm leading-none">TALOS</p>
-            <p className="text-slate-500 text-xs mt-0.5">Coach</p>
+            <p className="text-slate-500 text-xs mt-0.5">Asistente</p>
           </div>
         </div>
       </div>

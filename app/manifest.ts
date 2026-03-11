@@ -2,9 +2,9 @@ import type { MetadataRoute } from 'next';
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'TALOS Coach',
+    name: 'Asistente TALOS',
     short_name: 'TALOS',
-    description: 'Dashboard personal de hábitos — powered by TALOS AI',
+    description: 'Tu asistente personal inteligente — powered by TALOS AI',
     start_url: '/',
     display: 'standalone',
     orientation: 'portrait',

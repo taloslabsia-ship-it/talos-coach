@@ -4,13 +4,13 @@ import { Sidebar } from '@/components/Sidebar';
 import { ServiceWorkerRegistration } from '@/components/ServiceWorkerRegistration';
 
 export const metadata: Metadata = {
-  title: 'TALOS Coach',
-  description: 'Dashboard personal de hábitos — powered by TALOS',
+  title: 'Asistente TALOS',
+  description: 'Tu asistente personal inteligente — powered by TALOS AI',
   manifest: '/manifest.webmanifest',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
-    title: 'TALOS Coach',
+    title: 'Asistente TALOS',
   },
 };
 
