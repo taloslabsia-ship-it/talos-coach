@@ -33,6 +33,11 @@ export async function saveDiaryEntry(date: string, content: string, mood?: strin
   revalidatePath('/diary');
 }
 
+export async function deleteDiaryEntry(id: string) {
+  await db.collection('diary_entries').doc(id).delete();
+  revalidatePath('/diary');
+}
+
 export async function deleteNote(id: string) {
   await db.collection('notes').doc(id).delete();
   revalidatePath('/notes');

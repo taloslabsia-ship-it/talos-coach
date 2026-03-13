@@ -13,13 +13,13 @@ export default function manifest(): MetadataRoute.Manifest {
     categories: ['productivity', 'lifestyle'],
     icons: [
       {
-        src: '/api/icon/192',
+        src: '/icon-192.png',
         sizes: '192x192',
         type: 'image/png',
         purpose: 'any',
       },
       {
-        src: '/api/icon/512',
+        src: '/icon-512.png',
         sizes: '512x512',
         type: 'image/png',
         purpose: 'maskable',

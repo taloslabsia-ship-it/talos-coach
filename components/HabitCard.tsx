@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState, useTransition, useRef } from 'react';
 import { cn } from '@/lib/utils';
 import type { HabitWithLog } from '@/lib/types';
 import { toggleHabit } from '@/app/actions';
@@ -13,10 +13,33 @@ interface Props {
 export function HabitCard({ habit, date }: Props) {
   const [done, setDone] = useState(habit.log?.completed ?? false);
   const [isPending, startTransition] = useTransition();
+  const [burst, setBurst] = useState(false);
+  const btnRef = useRef<HTMLButtonElement>(null);
 
   const handleToggle = () => {
     const next = !done;
     setDone(next);
+    if (next) {
+      setBurst(true);
+      setTimeout(() => setBurst(false), 600);
+      import('canvas-confetti').then(({ default: confetti }) => {
+        const btn = btnRef.current;
+        if (btn) {
+          const rect = btn.getBoundingClientRect();
+          confetti({
+            particleCount: 40,
+            spread: 60,
+            startVelocity: 20,
+            origin: {
+              x: (rect.left + rect.width / 2) / window.innerWidth,
+              y: (rect.top + rect.height / 2) / window.innerHeight,
+            },
+            colors: ['#0df2f2', '#a855f7', '#ffffff'],
+            scalar: 0.8,
+          });
+        }
+      });
+    }
     startTransition(async () => {
       await toggleHabit(habit.id, date, next);
     });
@@ -55,14 +78,20 @@ export function HabitCard({ habit, date }: Props) {
       </div>
 
       <button
+        ref={btnRef}
         className={cn(
-          'w-8 h-8 rounded-xl border-2 flex items-center justify-center flex-shrink-0 transition-all',
-          done ? 'border-primary-500 bg-primary-500 neon-glow-sm' : 'border-slate-600 group-hover:border-primary-500/50'
+          'w-8 h-8 rounded-xl border-2 flex items-center justify-center flex-shrink-0 transition-all duration-300',
+          done ? 'border-primary-500 bg-primary-500 neon-glow-sm' : 'border-slate-600 group-hover:border-primary-500/50',
+          burst && 'scale-125'
         )}
         onClick={(e) => { e.stopPropagation(); handleToggle(); }}
       >
         {done && (
-          <svg className="w-4 h-4" style={{ color: '#0a1414' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg
+            className={cn('w-4 h-4 transition-all duration-300', burst ? 'scale-110' : 'scale-100')}
+            style={{ color: '#0a1414' }}
+            fill="none" viewBox="0 0 24 24" stroke="currentColor"
+          >
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
           </svg>
         )}

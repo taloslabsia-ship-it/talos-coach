@@ -22,22 +22,30 @@ export function DiaryEditor({ date, initialContent }: Props) {
   };
 
   return (
-    <div className="card space-y-3">
+    <div className="card-neon space-y-3">
       <div className="flex items-center justify-between">
-        <p className="font-semibold text-white">✍️ Pensamientos de hoy</p>
-        {saved && <span className="text-green-400 text-sm">Guardado ✓</span>}
+        <div className="flex items-center gap-2">
+          <span className="material-symbols-outlined text-xl" style={{ color: '#0df2f2', fontVariationSettings: "'FILL' 1" }}>edit_note</span>
+          <p className="font-bold text-white text-sm uppercase tracking-widest">Pensamientos de hoy</p>
+        </div>
+        {saved && (
+          <span className="flex items-center gap-1 text-xs font-semibold" style={{ color: '#0df2f2' }}>
+            <span className="material-symbols-outlined text-base" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
+            Guardado
+          </span>
+        )}
       </div>
       <textarea
         value={content}
-        onChange={(e) => setContent(e.target.value)}
+        onChange={e => setContent(e.target.value)}
         placeholder="¿Qué tenés en mente hoy? Escribí libremente..."
-        className="w-full bg-slate-800 rounded-xl p-4 text-slate-200 placeholder-slate-600 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-brand-500 min-h-[160px]"
+        className="input-dark resize-none min-h-[160px] text-sm"
       />
       <div className="flex justify-end">
         <button
           onClick={handleSave}
           disabled={isPending || !content.trim()}
-          className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+          className="btn-primary disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none text-sm"
         >
           {isPending ? 'Guardando...' : 'Guardar entrada'}
         </button>

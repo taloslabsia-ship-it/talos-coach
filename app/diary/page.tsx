@@ -1,7 +1,8 @@
-import { db } from '@/lib/firebase';
+import { db, toISO } from '@/lib/firebase';
 import { toDateString, formatDate } from '@/lib/utils';
 import { DiaryEditor } from '@/components/DiaryEditor';
 import { DiaryEntryCard } from '@/components/DiaryEntryCard';
+import { DiaryAnalysis } from '@/components/DiaryAnalysis';
 import type { DiaryEntry } from '@/lib/types';
 
 export const dynamic = 'force-dynamic';
@@ -10,13 +11,18 @@ async function getDiaryData() {
   const today = toDateString(new Date());
 
   const todayDoc = await db.collection('diary_entries').doc(today).get();
-  const todayEntry = todayDoc.exists ? { id: todayDoc.id, ...todayDoc.data() } as DiaryEntry : null;
+  const todayEntry = todayDoc.exists
+    ? (() => { const d = todayDoc.data()!; return { id: todayDoc.id, ...d, createdAt: toISO(d.createdAt) ?? '', updatedAt: toISO(d.updatedAt) ?? '' } as DiaryEntry; })()
+    : null;
 
   const entriesSnap = await db.collection('diary_entries')
     .orderBy('date', 'desc')
     .limit(30)
     .get();
-  const entries = entriesSnap.docs.map(d => ({ id: d.id, ...d.data() } as DiaryEntry));
+  const entries = entriesSnap.docs.map(d => {
+    const data = d.data();
+    return { id: d.id, ...data, createdAt: toISO(data.createdAt) ?? '', updatedAt: toISO(data.updatedAt) ?? '' } as DiaryEntry;
+  });
 
   return { todayEntry, entries, today };
 }
@@ -33,12 +39,15 @@ export default async function DiaryPage() {
       </div>
       <DiaryEditor date={today} initialContent={todayEntry?.content ?? ''} />
       {pastEntries.length > 0 && (
-        <div>
-          <h2 className="text-lg font-semibold text-white mb-3">Entradas anteriores</h2>
-          <div className="space-y-3">
-            {pastEntries.map(entry => <DiaryEntryCard key={entry.id} entry={entry} />)}
+        <>
+          <DiaryAnalysis entries={pastEntries} />
+          <div>
+            <h2 className="text-lg font-semibold text-white mb-3">Entradas anteriores</h2>
+            <div className="space-y-3">
+              {pastEntries.map(entry => <DiaryEntryCard key={entry.id} entry={entry} />)}
+            </div>
           </div>
-        </div>
+        </>
       )}
     </div>
   );

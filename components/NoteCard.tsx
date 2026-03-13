@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useTransition } from 'react';
+import ReactMarkdown from 'react-markdown';
 import { CATEGORY_COLORS, CATEGORY_LABELS } from '@/lib/utils';
 import { deleteNote, toggleNoteCompleted } from '@/app/actions';
 import type { Note } from '@/lib/types';
@@ -86,11 +87,24 @@ export function NoteCard({ note }: { note: Note }) {
             {note.title}
           </p>
 
-          {/* Contenido */}
-          <p className="text-slate-500 text-sm mt-1 leading-relaxed">
-            {expanded ? note.content : preview}
-            {!expanded && hasMore && <span className="text-slate-600"> ···</span>}
-          </p>
+          {/* Contenido con markdown */}
+          <div className="text-slate-500 text-sm mt-1 leading-relaxed prose-dark">
+            <ReactMarkdown
+              components={{
+                h1: ({children}) => <p className="font-bold text-slate-300 text-base">{children}</p>,
+                h2: ({children}) => <p className="font-bold text-slate-300">{children}</p>,
+                h3: ({children}) => <p className="font-semibold text-slate-400">{children}</p>,
+                strong: ({children}) => <strong className="text-slate-300 font-semibold">{children}</strong>,
+                em: ({children}) => <em className="text-slate-400">{children}</em>,
+                li: ({children}) => <li className="ml-4 list-disc text-slate-500">{children}</li>,
+                code: ({children}) => <code className="bg-white/5 px-1.5 py-0.5 rounded text-primary-400 text-xs font-mono">{children}</code>,
+                a: ({href, children}) => <a href={href} className="text-primary-400 underline" target="_blank" rel="noopener noreferrer">{children}</a>,
+                p: ({children}) => <p className="mb-1">{children}</p>,
+              }}
+            >
+              {expanded ? note.content : preview + (!expanded && hasMore ? ' ···' : '')}
+            </ReactMarkdown>
+          </div>
 
           {expanded && hasMore && (
             <button
