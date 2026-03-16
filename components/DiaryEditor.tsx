@@ -1,7 +1,6 @@
 'use client';
 
-import { useState, useTransition } from 'react';
-import { saveDiaryEntry } from '@/app/actions';
+import { useState } from 'react';
 
 interface Props {
   date: string;
@@ -12,20 +11,30 @@ export function DiaryEditor({ date, initialContent }: Props) {
   const [content, setContent] = useState(initialContent);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [isPending, startTransition] = useTransition();
+  const [isPending, setIsPending] = useState(false);
 
-  const handleSave = () => {
+  const handleSave = async () => {
+    if (isPending || !content.trim()) return;
     setError(null);
-    startTransition(async () => {
-      try {
-        await saveDiaryEntry(date, content);
-        setSaved(true);
-        setTimeout(() => setSaved(false), 2000);
-      } catch (err) {
-        console.error('Error guardando diario:', err);
-        setError('Error al guardar. Intentá de nuevo.');
+    setIsPending(true);
+    try {
+      const res = await fetch('/api/diary', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ date, content }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error ?? `Error ${res.status}`);
       }
-    });
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2000);
+    } catch (err: any) {
+      console.error('Error guardando diario:', err);
+      setError(err.message ?? 'Error al guardar. Intentá de nuevo.');
+    } finally {
+      setIsPending(false);
+    }
   };
 
   return (
