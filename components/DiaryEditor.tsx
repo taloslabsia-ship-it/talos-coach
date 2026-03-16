@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 interface Props {
   date: string;
@@ -8,6 +9,7 @@ interface Props {
 }
 
 export function DiaryEditor({ date, initialContent }: Props) {
+  const router = useRouter();
   const [content, setContent] = useState(initialContent);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -28,6 +30,7 @@ export function DiaryEditor({ date, initialContent }: Props) {
         throw new Error(data.error ?? `Error ${res.status}`);
       }
       setSaved(true);
+      router.refresh();
       setTimeout(() => setSaved(false), 4000);
     } catch (err: any) {
       console.error('Error guardando diario:', err);
