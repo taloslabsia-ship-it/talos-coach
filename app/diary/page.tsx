@@ -38,13 +38,13 @@ export default async function DiaryPage() {
         <p className="text-slate-400 text-sm mt-1 capitalize">{formatDate(today)}</p>
       </div>
       <DiaryEditor date={today} initialContent={todayEntry?.content ?? ''} />
-      {pastEntries.length > 0 && (
+      {(todayEntry || pastEntries.length > 0) && (
         <>
-          <DiaryAnalysis entries={pastEntries} />
+          <DiaryAnalysis entries={entries} />
           <div>
-            <h2 className="text-lg font-semibold text-white mb-3">Entradas anteriores</h2>
+            <h2 className="text-lg font-semibold text-white mb-3">Entradas</h2>
             <div className="space-y-3">
-              {pastEntries.map(entry => <DiaryEntryCard key={entry.id} entry={entry} />)}
+              {entries.map(entry => <DiaryEntryCard key={entry.id} entry={entry} />)}
             </div>
           </div>
         </>
