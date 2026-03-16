@@ -11,13 +11,20 @@ interface Props {
 export function DiaryEditor({ date, initialContent }: Props) {
   const [content, setContent] = useState(initialContent);
   const [saved, setSaved] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
   const handleSave = () => {
+    setError(null);
     startTransition(async () => {
-      await saveDiaryEntry(date, content);
-      setSaved(true);
-      setTimeout(() => setSaved(false), 2000);
+      try {
+        await saveDiaryEntry(date, content);
+        setSaved(true);
+        setTimeout(() => setSaved(false), 2000);
+      } catch (err) {
+        console.error('Error guardando diario:', err);
+        setError('Error al guardar. Intentá de nuevo.');
+      }
     });
   };
 
@@ -41,6 +48,9 @@ export function DiaryEditor({ date, initialContent }: Props) {
         placeholder="¿Qué tenés en mente hoy? Escribí libremente..."
         className="input-dark resize-none min-h-[160px] text-sm"
       />
+      {error && (
+        <p className="text-red-400 text-xs font-medium">{error}</p>
+      )}
       <div className="flex justify-end">
         <button
           onClick={handleSave}
