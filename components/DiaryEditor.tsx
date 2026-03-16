@@ -28,7 +28,7 @@ export function DiaryEditor({ date, initialContent }: Props) {
         throw new Error(data.error ?? `Error ${res.status}`);
       }
       setSaved(true);
-      setTimeout(() => setSaved(false), 2000);
+      setTimeout(() => setSaved(false), 4000);
     } catch (err: any) {
       console.error('Error guardando diario:', err);
       setError(err.message ?? 'Error al guardar. Intentá de nuevo.');
