@@ -3,6 +3,7 @@ import './globals.css';
 import { Sidebar } from '@/components/Sidebar';
 import { BottomNav } from '@/components/BottomNav';
 import { ServiceWorkerRegistration } from '@/components/ServiceWorkerRegistration';
+import { PageTransition } from '@/components/PageTransition';
 
 export const metadata: Metadata = {
   title: 'Asistente TALOS',
@@ -33,7 +34,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {/* Main content */}
         <main className="flex-1 overflow-y-auto">
           <div className="max-w-2xl mx-auto px-4 py-6 pb-24 md:pb-8 md:px-6 md:py-8 md:max-w-5xl">
-            {children}
+            <PageTransition>{children}</PageTransition>
           </div>
         </main>
         {/* Mobile bottom nav */}

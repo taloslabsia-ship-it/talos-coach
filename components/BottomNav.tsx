@@ -3,13 +3,14 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
+import { ClearCacheButton } from './ClearCacheButton';
 
 const NAV = [
-  { href: '/',             label: 'Inicio',  icon: 'grid_view' },
-  { href: '/habits',       label: 'Hábitos', icon: 'task_alt' },
-  { href: '/diary',        label: 'Diario',  icon: 'edit_note' },
-  { href: '/stats',        label: 'Stats',   icon: 'monitoring' },
-  { href: '/notes',        label: 'Notas',   icon: 'sticky_note_2' },
+  { href: '/',        label: 'Inicio',  icon: 'grid_view' },
+  { href: '/habits',  label: 'Hábitos', icon: 'task_alt' },
+  { href: '/agenda',  label: 'Agenda',  icon: 'calendar_month' },
+  { href: '/diary',   label: 'Diario',  icon: 'edit_note' },
+  { href: '/notes',   label: 'Notas',   icon: 'sticky_note_2' },
 ];
 
 export function BottomNav() {
@@ -21,6 +22,7 @@ export function BottomNav() {
       style={{ background: 'rgba(10, 20, 20, 0.85)', backdropFilter: 'blur(16px)', borderTop: '1px solid rgba(13,242,242,0.12)' }}
     >
       <div className="flex items-center justify-around">
+        <ClearCacheButton mobile />
         {NAV.map(({ href, label, icon }) => {
           const active = pathname === href;
           return (

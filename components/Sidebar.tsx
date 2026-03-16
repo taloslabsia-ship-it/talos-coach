@@ -1,14 +1,17 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
+import { ClearCacheButton } from './ClearCacheButton';
 
 const NAV = [
-  { href: '/',             label: 'Inicio',       icon: 'grid_view' },
-  { href: '/habits',       label: 'Hábitos',      icon: 'task_alt' },
+  { href: '/',             label: 'Inicio',        icon: 'grid_view' },
+  { href: '/habits',       label: 'Hábitos',       icon: 'task_alt' },
+  { href: '/agenda',       label: 'Agenda',        icon: 'calendar_month' },
   { href: '/diary',        label: 'Diario',        icon: 'edit_note' },
-  { href: '/stats',        label: 'Estadísticas', icon: 'monitoring' },
+  { href: '/stats',        label: 'Estadísticas',  icon: 'monitoring' },
   { href: '/achievements', label: 'Logros',        icon: 'emoji_events' },
   { href: '/notes',        label: 'Notas',         icon: 'sticky_note_2' },
 ];
@@ -27,11 +30,15 @@ export function Sidebar() {
       {/* Logo */}
       <div className="px-3 mb-8">
         <div className="flex items-center gap-3">
-          <div className="relative size-9 flex items-center justify-center">
+          <div className="relative size-10 flex items-center justify-center">
             <div className="absolute inset-0 orb-glow opacity-60 rounded-full" />
-            <span className="material-symbols-outlined text-primary-500 text-2xl relative z-10" style={{ fontVariationSettings: "'FILL' 1" }}>
-              radio_button_checked
-            </span>
+            <Image 
+              src="/icon-192.png" 
+              alt="TALOS Logo" 
+              width={40} 
+              height={40} 
+              className="relative z-10 rounded-xl"
+            />
           </div>
           <div>
             <p className="text-white font-black text-sm leading-none tracking-tight">TALOS</p>
@@ -68,7 +75,8 @@ export function Sidebar() {
       </nav>
 
       {/* Footer */}
-      <div className="px-3 pt-4 border-t" style={{ borderColor: 'rgba(13, 242, 242, 0.1)' }}>
+      <div className="px-3 pt-4 border-t space-y-2" style={{ borderColor: 'rgba(13, 242, 242, 0.1)' }}>
+        <ClearCacheButton />
         <p className="text-[10px] text-primary-500/40 text-center uppercase tracking-widest font-semibold">
           Powered by TALOS AI
         </p>
