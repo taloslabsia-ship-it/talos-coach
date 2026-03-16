@@ -2,25 +2,35 @@
 
 import { useState, useMemo } from 'react';
 import { NoteCard } from './NoteCard';
-import { CATEGORY_LABELS, CATEGORY_COLORS } from '@/lib/utils';
-import type { Note, NoteCategory } from '@/lib/types';
+import { getTab } from '@/lib/utils';
+import type { Note } from '@/lib/types';
 
-const ALL_CATEGORIES: NoteCategory[] = ['pendiente', 'prompt', 'idea', 'compras', 'trabajo', 'personal'];
+type Tab = 'tareas' | 'notas' | 'ideas';
 
-interface Props {
-  notes: Note[];
-}
+const TABS: { id: Tab; label: string; icon: string; emptyMsg: string }[] = [
+  { id: 'tareas', label: 'Tareas',  icon: 'checklist',     emptyMsg: 'No hay tareas pendientes.' },
+  { id: 'notas',  label: 'Notas',   icon: 'sticky_note_2', emptyMsg: 'No hay notas guardadas.'   },
+  { id: 'ideas',  label: 'Ideas',   icon: 'lightbulb',     emptyMsg: 'No hay ideas guardadas.'   },
+];
+
+interface Props { notes: Note[] }
 
 export function NotesClient({ notes }: Props) {
-  const [activeCategory, setActiveCategory] = useState<string>('all');
-  const [search, setSearch] = useState('');
+  const [activeTab, setActiveTab] = useState<Tab>('tareas');
+  const [search, setSearch]       = useState('');
+
+  const counts = useMemo(() => ({
+    tareas: notes.filter(n => getTab(n.category) === 'tareas').length,
+    notas:  notes.filter(n => getTab(n.category) === 'notas').length,
+    ideas:  notes.filter(n => getTab(n.category) === 'ideas').length,
+  }), [notes]);
+
+  const pendingTaskCount = useMemo(() =>
+    notes.filter(n => getTab(n.category) === 'tareas' && n.status !== 'completada' && !n.completed).length,
+  [notes]);
 
   const filtered = useMemo(() => {
-    let list = notes;
-
-    if (activeCategory !== 'all') {
-      list = list.filter(n => n.category === activeCategory);
-    }
+    let list = notes.filter(n => getTab(n.category) === activeTab);
 
     if (search.trim()) {
       const q = search.toLowerCase();
@@ -29,92 +39,93 @@ export function NotesClient({ notes }: Props) {
       );
     }
 
-    // Pendientes completadas van al final
-    return [...list].sort((a, b) => {
-      if (a.category === 'pendiente' && b.category === 'pendiente') {
-        if (a.completed && !b.completed) return 1;
-        if (!a.completed && b.completed) return -1;
-      }
-      return 0; // mantiene orden por fecha (ya viene ordenado del server)
-    });
-  }, [notes, activeCategory, search]);
+    // Tareas completadas al fondo
+    if (activeTab === 'tareas') {
+      return [...list].sort((a, b) => {
+        const aDone = a.status === 'completada' || !!a.completed;
+        const bDone = b.status === 'completada' || !!b.completed;
+        if (aDone && !bDone) return 1;
+        if (!aDone && bDone) return -1;
+        // En progreso primero dentro de las no completadas
+        if (a.status === 'en_progreso' && b.status !== 'en_progreso') return -1;
+        if (a.status !== 'en_progreso' && b.status === 'en_progreso') return 1;
+        return 0;
+      });
+    }
 
-  const pendienteCount = notes.filter(n => n.category === 'pendiente' && !n.completed).length;
+    return list;
+  }, [notes, activeTab, search]);
+
+  const currentTab = TABS.find(t => t.id === activeTab)!;
 
   return (
     <div className="space-y-5">
-      {/* Search */}
-      <div className="relative">
-        <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xl">search</span>
-        <input
-          type="text"
-          placeholder="Buscar notas..."
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          className="input-dark pl-10"
-        />
-        {search && (
-          <button
-            onClick={() => setSearch('')}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300"
-          >
-            <span className="material-symbols-outlined text-xl">close</span>
-          </button>
-        )}
-      </div>
 
-      {/* Category pills */}
-      <div className="flex gap-2 flex-wrap">
-        <button
-          onClick={() => setActiveCategory('all')}
-          className={`badge cursor-pointer transition-all px-3 py-1.5 ${
-            activeCategory === 'all'
-              ? 'bg-primary-500/15 text-primary-400 border border-primary-500/30'
-              : 'bg-white/5 text-slate-400 border border-white/10 hover:border-white/20'
-          }`}
-        >
-          Todas · {notes.length}
-        </button>
-        {ALL_CATEGORIES.map(cat => {
-          const count = notes.filter(n => n.category === cat).length;
-          if (count === 0) return null;
+      {/* Tabs */}
+      <div className="flex gap-1 p-1 rounded-2xl" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
+        {TABS.map(tab => {
+          const isActive = activeTab === tab.id;
           return (
             <button
-              key={cat}
-              onClick={() => setActiveCategory(cat)}
-              className={`badge cursor-pointer transition-all px-3 py-1.5 ${
-                activeCategory === cat
-                  ? CATEGORY_COLORS[cat]
-                  : 'bg-white/5 text-slate-400 border border-white/10 hover:border-white/20'
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs font-bold uppercase tracking-wide transition-all ${
+                isActive
+                  ? 'bg-primary-500/15 text-primary-400 border border-primary-500/25'
+                  : 'text-slate-500 hover:text-slate-300'
               }`}
             >
-              {CATEGORY_LABELS[cat]} · {count}
+              <span className="material-symbols-outlined text-base"
+                style={{ fontVariationSettings: isActive ? "'FILL' 1" : "'FILL' 0" }}>
+                {tab.icon}
+              </span>
+              <span className="hidden sm:inline">{tab.label}</span>
+              <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-mono ${
+                isActive ? 'bg-primary-500/20 text-primary-300' : 'bg-white/5 text-slate-600'
+              }`}>
+                {counts[tab.id]}
+              </span>
             </button>
           );
         })}
       </div>
 
-      {/* Pending alert */}
-      {pendienteCount > 0 && (activeCategory === 'all' || activeCategory === 'pendiente') && (
+      {/* Search */}
+      <div className="relative">
+        <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xl">search</span>
+        <input
+          type="text"
+          placeholder={`Buscar ${currentTab.label.toLowerCase()}...`}
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          className="input-dark pl-10"
+        />
+        {search && (
+          <button onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300">
+            <span className="material-symbols-outlined text-xl">close</span>
+          </button>
+        )}
+      </div>
+
+      {/* Alerta tareas pendientes */}
+      {activeTab === 'tareas' && pendingTaskCount > 0 && !search && (
         <div className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium"
           style={{ background: 'rgba(13,242,242,0.06)', border: '1px solid rgba(13,242,242,0.15)', color: '#0df2f2' }}>
           <span className="material-symbols-outlined text-base">pending_actions</span>
-          {pendienteCount} {pendienteCount === 1 ? 'tarea pendiente' : 'tareas pendientes'}
+          {pendingTaskCount} {pendingTaskCount === 1 ? 'tarea sin completar' : 'tareas sin completar'} — clic en el ícono para avanzar estado
         </div>
       )}
 
-      {/* Notes list */}
+      {/* Lista */}
       {filtered.length > 0 ? (
         <div className="space-y-3">
           {filtered.map(note => <NoteCard key={note.id} note={note} />)}
         </div>
       ) : (
         <div className="card text-center py-16">
-          <p className="text-4xl mb-3">
-            {search ? '🔍' : '📭'}
-          </p>
+          <p className="text-4xl mb-3">{search ? '🔍' : activeTab === 'tareas' ? '✅' : activeTab === 'ideas' ? '💡' : '📝'}</p>
           <p className="text-slate-500 text-sm">
-            {search ? `Sin resultados para "${search}"` : 'No hay notas en esta categoría.'}
+            {search ? `Sin resultados para "${search}"` : currentTab.emptyMsg}
           </p>
         </div>
       )}

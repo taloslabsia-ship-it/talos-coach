@@ -51,6 +51,15 @@ export async function toggleNoteCompleted(id: string, completed: boolean) {
   revalidatePath('/notes');
 }
 
+export async function updateNoteStatus(id: string, status: 'pendiente' | 'en_progreso' | 'completada') {
+  await db.collection('notes').doc(id).update({
+    status,
+    completed: status === 'completada',
+    updatedAt: FieldValue.serverTimestamp(),
+  });
+  revalidatePath('/notes');
+}
+
 export async function createHabit(name: string, emoji: string, description: string | null, timeLabel: string | null) {
   const snap = await db.collection('habits').orderBy('sortOrder', 'desc').limit(1).get();
   const maxOrder = snap.empty ? 0 : ((snap.docs[0].data().sortOrder as number) ?? 0);

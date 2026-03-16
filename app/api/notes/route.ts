@@ -32,17 +32,19 @@ export async function POST(req: NextRequest) {
   const { title, content, category = 'personal' } = body;
   if (!title || !content) return NextResponse.json({ error: 'Se requieren title y content' }, { status: 400 });
 
-  const validCategories = ['pendiente', 'prompt', 'idea', 'compras', 'trabajo', 'personal'];
+  const validCategories = ['tarea', 'nota', 'idea', 'pendiente', 'prompt', 'compras', 'trabajo', 'personal'];
   if (!validCategories.includes(category)) {
-    return NextResponse.json({ error: `Categoría inválida. Opciones: ${validCategories.join(', ')}` }, { status: 400 });
+    return NextResponse.json({ error: `Categoría inválida. Opciones: tarea, nota, idea` }, { status: 400 });
   }
 
+  const isTarea = category === 'tarea' || category === 'pendiente';
   const ref = await db.collection('notes').add({
     title,
     content,
     category,
     source: 'talos',
     completed: false,
+    status: isTarea ? 'pendiente' : null,
     createdAt: FieldValue.serverTimestamp(),
     updatedAt: FieldValue.serverTimestamp(),
   });

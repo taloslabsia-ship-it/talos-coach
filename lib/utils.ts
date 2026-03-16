@@ -42,28 +42,56 @@ export function capitalize(s: string): string {
 }
 
 export const CATEGORY_COLORS: Record<string, string> = {
+  tarea:     'bg-primary-500/10 text-primary-400 border border-primary-500/20',
+  nota:      'bg-slate-500/10 text-slate-400 border border-slate-500/20',
+  idea:      'bg-amber-500/10 text-amber-400 border border-amber-500/20',
+  // legacy
   pendiente: 'bg-primary-500/10 text-primary-400 border border-primary-500/20',
   prompt:    'bg-purple-500/10 text-purple-400 border border-purple-500/20',
-  idea:      'bg-amber-500/10 text-amber-400 border border-amber-500/20',
   compras:   'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20',
   trabajo:   'bg-blue-500/10 text-blue-400 border border-blue-500/20',
-  personal:  'bg-pink-500/10 text-pink-400 border border-pink-500/20',
+  personal:  'bg-slate-500/10 text-slate-400 border border-slate-500/20',
 };
 
 export const CATEGORY_LABELS: Record<string, string> = {
-  pendiente: '✅ Pendientes',
-  prompt:    '📋 Prompts',
-  idea:      '💡 Ideas',
-  compras:   '🛒 Compras',
-  trabajo:   '💼 Trabajo',
-  personal:  '👤 Personal',
+  tarea:     'Tarea',
+  nota:      'Nota',
+  idea:      'Idea',
+  // legacy
+  pendiente: 'Tarea',
+  prompt:    'Prompt',
+  idea_old:  'Idea',
+  compras:   'Compras',
+  trabajo:   'Trabajo',
+  personal:  'Nota',
 };
 
 export const CATEGORY_ICONS: Record<string, string> = {
-  pendiente: '✅',
-  prompt:    '📋',
-  idea:      '💡',
-  compras:   '🛒',
-  trabajo:   '💼',
-  personal:  '👤',
+  tarea:     'checklist',
+  nota:      'sticky_note_2',
+  idea:      'lightbulb',
+  pendiente: 'checklist',
+  prompt:    'article',
+  compras:   'shopping_cart',
+  trabajo:   'work',
+  personal:  'person',
 };
+
+export const STATUS_LABELS: Record<string, string> = {
+  pendiente:   'Pendiente',
+  en_progreso: 'En progreso',
+  completada:  'Completada',
+};
+
+export const STATUS_COLORS: Record<string, string> = {
+  pendiente:   'bg-amber-500/10 text-amber-400 border border-amber-500/20',
+  en_progreso: 'bg-blue-500/10 text-blue-400 border border-blue-500/20',
+  completada:  'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20',
+};
+
+// Maps a category to the 3 main tabs
+export function getTab(category: string): 'tareas' | 'notas' | 'ideas' {
+  if (category === 'tarea' || category === 'pendiente') return 'tareas';
+  if (category === 'idea') return 'ideas';
+  return 'notas';
+}

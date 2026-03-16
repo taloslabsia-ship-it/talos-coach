@@ -2,17 +2,33 @@
 
 import { useState, useTransition } from 'react';
 import ReactMarkdown from 'react-markdown';
-import { CATEGORY_COLORS, CATEGORY_LABELS } from '@/lib/utils';
-import { deleteNote, toggleNoteCompleted } from '@/app/actions';
-import type { Note } from '@/lib/types';
+import { STATUS_COLORS, STATUS_LABELS, getTab } from '@/lib/utils';
+import { deleteNote, updateNoteStatus } from '@/app/actions';
+import type { Note, TaskStatus } from '@/lib/types';
+
+const STATUS_CYCLE: TaskStatus[] = ['pendiente', 'en_progreso', 'completada'];
+
+const STATUS_ICONS: Record<TaskStatus, string> = {
+  pendiente:   'radio_button_unchecked',
+  en_progreso: 'pending',
+  completada:  'task_alt',
+};
+
+function nextStatus(current: TaskStatus): TaskStatus {
+  const idx = STATUS_CYCLE.indexOf(current);
+  return STATUS_CYCLE[(idx + 1) % STATUS_CYCLE.length];
+}
 
 export function NoteCard({ note }: { note: Note }) {
   const [copied, setCopied] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [isPending, startTransition] = useTransition();
-  const [localCompleted, setLocalCompleted] = useState(note.completed ?? false);
 
-  const isPendiente = note.category === 'pendiente';
+  const isTask = getTab(note.category) === 'tareas';
+  const currentStatus: TaskStatus = note.status ?? (note.completed ? 'completada' : 'pendiente');
+  const [localStatus, setLocalStatus] = useState<TaskStatus>(currentStatus);
+
+  const isDone = localStatus === 'completada';
 
   const handleCopy = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -27,11 +43,11 @@ export function NoteCard({ note }: { note: Note }) {
     startTransition(async () => { await deleteNote(note.id); });
   };
 
-  const handleToggleCompleted = (e: React.MouseEvent) => {
+  const handleCycleStatus = (e: React.MouseEvent) => {
     e.stopPropagation();
-    const next = !localCompleted;
-    setLocalCompleted(next);
-    startTransition(async () => { await toggleNoteCompleted(note.id, next); });
+    const next = nextStatus(localStatus);
+    setLocalStatus(next);
+    startTransition(async () => { await updateNoteStatus(note.id, next); });
   };
 
   const preview = note.content.slice(0, 200);
@@ -43,37 +59,39 @@ export function NoteCard({ note }: { note: Note }) {
   return (
     <div
       className={`border rounded-2xl p-4 cursor-pointer transition-all duration-300 ${
-        localCompleted && isPendiente
-          ? 'opacity-50 bg-white/[0.01] border-white/[0.04]'
+        isDone && isTask
+          ? 'opacity-40 bg-white/[0.01] border-white/[0.04]'
           : 'bg-white/[0.03] border-white/[0.07] hover:border-primary-500/20'
       } ${isPending ? 'opacity-60' : ''}`}
       onClick={() => setExpanded(!expanded)}
     >
       <div className="flex items-start gap-3">
-        {/* Checkbox solo para pendiente */}
-        {isPendiente && (
+
+        {/* Status toggle (solo para tareas) */}
+        {isTask && (
           <button
-            onClick={handleToggleCompleted}
-            className={`mt-0.5 w-5 h-5 rounded-lg border-2 flex items-center justify-center flex-shrink-0 transition-all ${
-              localCompleted
-                ? 'border-primary-500 bg-primary-500 neon-glow-sm'
-                : 'border-slate-600 hover:border-primary-500/50'
+            onClick={handleCycleStatus}
+            title={`${STATUS_LABELS[localStatus]} — clic para avanzar`}
+            className={`mt-0.5 flex-shrink-0 transition-all rounded-full ${
+              localStatus === 'completada' ? 'text-emerald-400' :
+              localStatus === 'en_progreso' ? 'text-blue-400' : 'text-slate-500 hover:text-amber-400'
             }`}
           >
-            {localCompleted && (
-              <svg className="w-3 h-3" style={{ color: '#0a1414' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-              </svg>
-            )}
+            <span className="material-symbols-outlined text-xl"
+              style={{ fontVariationSettings: localStatus === 'completada' ? "'FILL' 1" : "'FILL' 0" }}>
+              {STATUS_ICONS[localStatus]}
+            </span>
           </button>
         )}
 
         <div className="flex-1 min-w-0">
-          {/* Badge + fecha */}
+          {/* Badges + fecha */}
           <div className="flex items-center gap-2 mb-1.5 flex-wrap">
-            <span className={`badge text-[10px] ${CATEGORY_COLORS[note.category]}`}>
-              {CATEGORY_LABELS[note.category]}
-            </span>
+            {isTask && (
+              <span className={`badge text-[10px] ${STATUS_COLORS[localStatus]}`}>
+                {STATUS_LABELS[localStatus]}
+              </span>
+            )}
             {note.source === 'talos' && (
               <span className="badge text-[10px]" style={{ background: 'rgba(13,242,242,0.08)', color: '#0df2f2', border: '1px solid rgba(13,242,242,0.15)' }}>
                 ⚡ TALOS
@@ -83,11 +101,11 @@ export function NoteCard({ note }: { note: Note }) {
           </div>
 
           {/* Título */}
-          <p className={`font-semibold text-sm transition-all ${localCompleted && isPendiente ? 'line-through text-slate-500' : 'text-white'}`}>
+          <p className={`font-semibold text-sm transition-all ${isDone && isTask ? 'line-through text-slate-500' : 'text-white'}`}>
             {note.title}
           </p>
 
-          {/* Contenido con markdown */}
+          {/* Contenido */}
           <div className="text-slate-500 text-sm mt-1 leading-relaxed prose-dark">
             <ReactMarkdown
               components={{
@@ -119,22 +137,13 @@ export function NoteCard({ note }: { note: Note }) {
 
         {/* Acciones */}
         <div className="flex items-center gap-1 flex-shrink-0" onClick={e => e.stopPropagation()}>
-          <button
-            onClick={handleCopy}
-            className="text-slate-500 hover:text-primary-400 p-1.5 rounded-xl transition-colors"
-            title="Copiar"
-          >
+          <button onClick={handleCopy} className="text-slate-500 hover:text-primary-400 p-1.5 rounded-xl transition-colors" title="Copiar">
             <span className="material-symbols-outlined text-lg"
               style={{ fontVariationSettings: copied ? "'FILL' 1" : "'FILL' 0", color: copied ? '#0df2f2' : undefined }}>
               {copied ? 'check' : 'content_copy'}
             </span>
           </button>
-          <button
-            onClick={handleDelete}
-            disabled={isPending}
-            className="text-slate-600 hover:text-red-400 p-1.5 rounded-xl transition-colors"
-            title="Eliminar"
-          >
+          <button onClick={handleDelete} disabled={isPending} className="text-slate-600 hover:text-red-400 p-1.5 rounded-xl transition-colors" title="Eliminar">
             <span className="material-symbols-outlined text-lg">delete</span>
           </button>
         </div>

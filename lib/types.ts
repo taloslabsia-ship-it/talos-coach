@@ -34,7 +34,8 @@ export interface DiaryEntry {
   updatedAt: string;
 }
 
-export type NoteCategory = 'pendiente' | 'prompt' | 'idea' | 'compras' | 'trabajo' | 'personal';
+export type NoteCategory = 'tarea' | 'nota' | 'idea' | 'pendiente' | 'prompt' | 'compras' | 'trabajo' | 'personal';
+export type TaskStatus = 'pendiente' | 'en_progreso' | 'completada';
 
 export interface Note {
   id: string;
@@ -42,7 +43,8 @@ export interface Note {
   content: string;
   category: NoteCategory;
   source: string;       // 'manual' | 'talos'
-  completed?: boolean;  // solo aplica a categoría 'pendiente'
+  completed?: boolean;
+  status?: TaskStatus;  // solo para tareas
   createdAt: string;
   updatedAt: string;
 }
