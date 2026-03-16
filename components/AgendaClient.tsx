@@ -60,7 +60,7 @@ function ReminderItem({ reminder }: { reminder: Reminder }) {
           {reminder.text}
         </p>
         <div className="flex items-center gap-3 mt-1.5">
-          <span className="text-xs text-slate-500 font-mono">
+          <span className="text-xs text-slate-500 font-mono" suppressHydrationWarning>
             📅 {formatDate(reminder.date)}
           </span>
           <span className="text-xs text-slate-500 font-mono">

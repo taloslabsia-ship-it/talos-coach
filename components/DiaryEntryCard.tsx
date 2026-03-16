@@ -32,7 +32,7 @@ export function DiaryEntryCard({ entry }: { entry: DiaryEntry }) {
             <span className="material-symbols-outlined text-base" style={{ color: '#0df2f2', fontVariationSettings: "'FILL' 1" }}>
               edit_note
             </span>
-            <p className="text-xs font-semibold uppercase tracking-widest text-slate-400 capitalize">
+            <p className="text-xs font-semibold uppercase tracking-widest text-slate-400 capitalize" suppressHydrationWarning>
               {formatDate(entry.date)}
             </p>
           </div>
