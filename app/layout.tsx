@@ -4,6 +4,7 @@ import { Sidebar } from '@/components/Sidebar';
 import { BottomNav } from '@/components/BottomNav';
 import { ServiceWorkerRegistration } from '@/components/ServiceWorkerRegistration';
 import { PageTransition } from '@/components/PageTransition';
+import { PullToRefresh } from '@/components/PullToRefresh';
 
 export const metadata: Metadata = {
   title: 'Asistente TALOS',
@@ -37,6 +38,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <PageTransition>{children}</PageTransition>
           </div>
         </main>
+        {/* Mobile pull-to-refresh */}
+        <PullToRefresh />
         {/* Mobile bottom nav */}
         <BottomNav />
       </body>
