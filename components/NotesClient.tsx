@@ -1,6 +1,8 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
+import { collection, query, orderBy, limit, onSnapshot } from 'firebase/firestore';
+import { clientDb } from '@/lib/firebase-client';
 import { NoteCard } from './NoteCard';
 import { getTab } from '@/lib/utils';
 import type { Note } from '@/lib/types';
@@ -15,9 +17,41 @@ const TABS: { id: Tab; label: string; icon: string; emptyMsg: string }[] = [
 
 interface Props { notes: Note[] }
 
-export function NotesClient({ notes }: Props) {
+export function NotesClient({ notes: initialNotes }: Props) {
+  const [notes, setNotes]     = useState<Note[]>(initialNotes);
   const [activeTab, setActiveTab] = useState<Tab>('tareas');
   const [search, setSearch]       = useState('');
+
+  // Listener en tiempo real — actualiza instantáneamente cuando el bot guarda una nota
+  useEffect(() => {
+    const q = query(
+      collection(clientDb, 'notes'),
+      orderBy('createdAt', 'desc'),
+      limit(200)
+    );
+
+    const unsub = onSnapshot(q, (snap) => {
+      const updated: Note[] = snap.docs.map(d => {
+        const data = d.data();
+        const createdAt = data.createdAt?.toDate?.()?.toISOString() ?? data.createdAt ?? '';
+        const updatedAt = data.updatedAt?.toDate?.()?.toISOString() ?? data.updatedAt ?? '';
+        return {
+          id: d.id,
+          title: data.title ?? '',
+          content: data.content ?? '',
+          category: data.category ?? 'personal',
+          source: data.source ?? 'manual',
+          completed: data.completed ?? false,
+          status: data.status,
+          createdAt,
+          updatedAt,
+        } as Note;
+      });
+      setNotes(updated);
+    });
+
+    return () => unsub();
+  }, []);
 
   const counts = useMemo(() => ({
     tareas: notes.filter(n => getTab(n.category) === 'tareas').length,
@@ -46,7 +80,6 @@ export function NotesClient({ notes }: Props) {
         const bDone = b.status === 'completada' || !!b.completed;
         if (aDone && !bDone) return 1;
         if (!aDone && bDone) return -1;
-        // En progreso primero dentro de las no completadas
         if (a.status === 'en_progreso' && b.status !== 'en_progreso') return -1;
         if (a.status !== 'en_progreso' && b.status === 'en_progreso') return 1;
         return 0;
