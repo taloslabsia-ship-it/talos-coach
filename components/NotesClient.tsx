@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect } from 'react';
 import { collection, query, orderBy, limit, onSnapshot } from 'firebase/firestore';
-import { clientDb } from '@/lib/firebase-client';
+import { clientDb, clientAuth } from '@/lib/firebase-client';
 import { NoteCard } from './NoteCard';
 import { getTab } from '@/lib/utils';
 import type { Note } from '@/lib/types';
@@ -24,8 +24,11 @@ export function NotesClient({ notes: initialNotes }: Props) {
 
   // Listener en tiempo real — actualiza instantáneamente cuando el bot guarda una nota
   useEffect(() => {
+    const uid = clientAuth.currentUser?.uid;
+    if (!uid) return;
+
     const q = query(
-      collection(clientDb, 'notes'),
+      collection(clientDb, 'users', uid, 'notes'),
       orderBy('createdAt', 'desc'),
       limit(200)
     );
