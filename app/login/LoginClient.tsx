@@ -233,9 +233,6 @@ export function LoginClient() {
           </div>
         </div>
 
-        <p className="text-center text-[10px] text-slate-600 uppercase tracking-widest">
-          Seguridad por TALOS Soft
-        </p>
       </div>
     </div>
   );
