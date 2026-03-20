@@ -10,6 +10,7 @@ import {
 import { clientAuth, googleProvider } from '@/lib/firebase-client';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
+import { NeuralBackground } from '@/components/NeuralBackground';
 
 type Mode = 'login' | 'register' | 'reset';
 
@@ -87,7 +88,7 @@ export function LoginClient() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-4 py-8"
+    <div className="min-h-screen flex flex-col items-center justify-center px-4 py-8 relative"
       style={{
         background: '#0a1414',
         backgroundImage:
@@ -95,11 +96,12 @@ export function LoginClient() {
           'radial-gradient(ellipse at 85% 80%, rgba(168,85,247,0.06) 0%, transparent 50%)',
       }}
     >
+      <NeuralBackground />
       {/* Install PWA banner */}
       {installPrompt && (
         <button
           onClick={handleInstall}
-          className="mb-6 w-full max-w-sm flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold transition-all active:scale-[0.97] animate-in"
+          className="mb-6 w-full max-w-sm flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold transition-all active:scale-[0.97] animate-in relative z-10"
           style={{
             background: 'rgba(13,242,242,0.08)',
             border: '1px solid rgba(13,242,242,0.25)',
@@ -117,7 +119,7 @@ export function LoginClient() {
         </button>
       )}
 
-      <div className="w-full max-w-sm space-y-6">
+      <div className="w-full max-w-sm space-y-6 relative z-10">
 
         {/* Logo */}
         <div className="flex flex-col items-center gap-4">
