@@ -57,6 +57,22 @@ export interface MotivationalPhrase {
   createdAt: string;
 }
 
+export interface Comercio {
+  id: string;
+  label: string;
+  active: boolean;
+}
+
+export type BotPersonality = 'acompanante' | 'equilibrado' | 'entrenador' | 'beast';
+
+export interface UserProfile {
+  name: string;
+  botPersonality: BotPersonality;
+  quietStart: string; // "HH:MM"
+  quietEnd: string;   // "HH:MM"
+  onboardingDone: boolean;
+}
+
 // Stats helpers
 export interface DayStats {
   date: string;

@@ -5,12 +5,12 @@ import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 
 const NAV = [
-  { href: '/',       label: 'Inicio',  icon: 'grid_view' },
-  { href: '/habits', label: 'Hábitos', icon: 'task_alt' },
-  { href: '/agenda', label: 'Agenda',  icon: 'calendar_month' },
-  { href: '/diary',  label: 'Diario',  icon: 'edit_note' },
-  { href: '/stats',  label: 'Stats',   icon: 'monitoring' },
-  { href: '/notes',  label: 'Notas',   icon: 'sticky_note_2' },
+  { href: '/',          label: 'Inicio',  icon: 'grid_view' },
+  { href: '/habits',    label: 'Hábitos', icon: 'task_alt' },
+  { href: '/agenda',    label: 'Agenda',  icon: 'calendar_month' },
+  { href: '/diary',     label: 'Diario',  icon: 'edit_note' },
+  { href: '/notes',     label: 'Notas',   icon: 'sticky_note_2' },
+  { href: '/settings',  label: 'Config',  icon: 'tune' },
 ];
 
 export function BottomNav() {

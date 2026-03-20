@@ -12,8 +12,8 @@ const NAV = [
   { href: '/agenda',       label: 'Agenda',        icon: 'calendar_month' },
   { href: '/diary',        label: 'Diario',        icon: 'edit_note' },
   { href: '/stats',        label: 'Estadísticas',  icon: 'monitoring' },
-  { href: '/achievements', label: 'Logros',        icon: 'emoji_events' },
   { href: '/notes',        label: 'Notas',         icon: 'sticky_note_2' },
+  { href: '/settings',     label: 'Configuración', icon: 'tune' },
 ];
 
 export function Sidebar() {

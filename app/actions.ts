@@ -3,6 +3,51 @@
 import { db } from '@/lib/firebase';
 import { FieldValue } from 'firebase-admin/firestore';
 import { revalidatePath } from 'next/cache';
+import type { UserProfile, Comercio } from '@/lib/types';
+
+export async function getUserProfile(): Promise<UserProfile | null> {
+  const doc = await db.collection('config').doc('profile').get();
+  if (!doc.exists) return null;
+  return doc.data() as UserProfile;
+}
+
+export async function saveUserProfile(profile: Partial<UserProfile>) {
+  await db.collection('config').doc('profile').set(
+    { ...profile, updatedAt: FieldValue.serverTimestamp() },
+    { merge: true }
+  );
+  revalidatePath('/settings');
+  revalidatePath('/');
+}
+
+// ── Integrations ─────────────────────────────────────────────────────────────
+
+export async function getIntegrationsStatus() {
+  const [calendarDoc, comerciosDoc] = await Promise.all([
+    db.collection('config').doc('google_oauth').get(),
+    db.collection('config').doc('ventas_comercios').get(),
+  ]);
+
+  const calendarConnected = calendarDoc.exists && !!calendarDoc.data()?.refresh_token;
+
+  const defaultComercios: Comercio[] = [
+    { id: 'qcqXIFsZeHPpN29BeHIW2T8LUh92', label: 'Vinoteca Talos', active: true },
+    { id: 'N52iXyvZkvPbTVWYR87jP0bgID92', label: 'Central Comercio', active: true },
+  ];
+  const comercios: Comercio[] = comerciosDoc.exists
+    ? (comerciosDoc.data()?.comercios ?? defaultComercios)
+    : defaultComercios;
+
+  return { calendarConnected, comercios };
+}
+
+export async function saveComercios(comercios: Comercio[]) {
+  await db.collection('config').doc('ventas_comercios').set(
+    { comercios, updatedAt: FieldValue.serverTimestamp() },
+    { merge: true }
+  );
+  revalidatePath('/settings');
+}
 
 export async function toggleHabit(habitId: string, date: string, completed: boolean) {
   const docId = `${habitId}_${date}`;
@@ -55,6 +100,16 @@ export async function updateNoteStatus(id: string, status: 'pendiente' | 'en_pro
   await db.collection('notes').doc(id).update({
     status,
     completed: status === 'completada',
+    updatedAt: FieldValue.serverTimestamp(),
+  });
+  revalidatePath('/notes');
+}
+
+export async function updateNote(id: string, data: { title: string; content: string; category: string }) {
+  await db.collection('notes').doc(id).update({
+    title: data.title,
+    content: data.content,
+    category: data.category,
     updatedAt: FieldValue.serverTimestamp(),
   });
   revalidatePath('/notes');

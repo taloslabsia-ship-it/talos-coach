@@ -1,10 +1,12 @@
 export const dynamic = 'force-dynamic';
 
 import Image from 'next/image';
+import Link from 'next/link';
 import { db, toISO } from '@/lib/firebase';
 import { toDateString, getLast7Days, formatDate } from '@/lib/utils';
 import { HabitCardMini } from '@/components/HabitCardMini';
 import { WeekCalendar } from '@/components/WeekCalendar';
+import { getUserProfile } from '@/app/actions';
 import type { Habit, HabitLog, HabitWithLog } from '@/lib/types';
 
 async function getTodayData() {
@@ -102,8 +104,8 @@ async function getStreak(): Promise<number> {
 
 export default async function HomePage() {
   try {
-    const [{ habitsWithLogs, weekLogs, phrase, today }, streak] =
-      await Promise.all([getTodayData(), getStreak()]);
+    const [{ habitsWithLogs, weekLogs, phrase, today }, streak, profile] =
+      await Promise.all([getTodayData(), getStreak(), getUserProfile().catch(() => null)]);
 
     const completed = habitsWithLogs.filter(h => h.log?.completed).length;
     const total = habitsWithLogs.length;
@@ -118,6 +120,20 @@ export default async function HomePage() {
 
     return (
       <div className="space-y-6">
+
+        {/* Onboarding banner */}
+        {!profile?.onboardingDone && (
+          <Link href="/settings" className="flex items-center gap-3 px-4 py-3 rounded-2xl transition-all"
+            style={{ background: 'rgba(13,242,242,0.08)', border: '1px solid rgba(13,242,242,0.25)' }}>
+            <span className="material-symbols-outlined text-xl" style={{ color: '#0df2f2', fontVariationSettings: "'FILL' 1" }}>tune</span>
+            <div className="flex-1 min-w-0">
+              <p className="text-white font-semibold text-sm">Configurá tu coach</p>
+              <p className="text-slate-400 text-xs">Elegí la personalidad del asistente para empezar</p>
+            </div>
+            <span className="material-symbols-outlined text-lg text-slate-500">chevron_right</span>
+          </Link>
+        )}
+
         {/* Header */}
         <header className="flex items-center justify-between">
           <div className="flex items-center gap-3">

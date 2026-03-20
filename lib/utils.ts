@@ -4,21 +4,28 @@ export function cn(...inputs: ClassValue[]) {
   return clsx(inputs);
 }
 
+const TZ = 'America/Argentina/Buenos_Aires';
+
 export function formatDate(date: Date | string): string {
-  const d = typeof date === 'string' ? new Date(date) : date;
+  // Append T12:00:00 so Node treats it as local noon (UTC), avoiding midnight-UTC → prev-day-ART conversion
+  const d = typeof date === 'string' ? new Date(date + 'T12:00:00') : date;
   return d.toLocaleDateString('es-AR', {
     weekday: 'long',
     year: 'numeric',
     month: 'long',
     day: 'numeric',
+    timeZone: TZ,
   });
 }
 
 export function toDateString(date: Date): string {
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, '0');
-  const d = String(date.getDate()).padStart(2, '0');
-  return `${y}-${m}-${d}`;
+  // Use Argentina timezone so date matches local day, not UTC
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone: TZ,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(date);
 }
 
 export function getLast7Days(): string[] {

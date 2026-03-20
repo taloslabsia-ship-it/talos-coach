@@ -19,8 +19,8 @@ export function ClearCacheButton({ mobile = false }: { mobile?: boolean }) {
         await Promise.all(regs.map(r => r.unregister()));
       }
     } finally {
-      // 3. Hard reload (bypasea caché HTTP)
-      window.location.href = window.location.href;
+      // 3. Hard reload con cache-busting para forzar fetch desde servidor
+      window.location.href = window.location.origin + '/?v=' + Date.now();
     }
   };
 

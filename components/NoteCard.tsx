@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { STATUS_COLORS, STATUS_LABELS, getTab } from '@/lib/utils';
-import { deleteNote, updateNoteStatus } from '@/app/actions';
+import { deleteNote, updateNoteStatus, updateNote } from '@/app/actions';
 import type { Note, TaskStatus } from '@/lib/types';
 
 const STATUS_CYCLE: TaskStatus[] = ['pendiente', 'en_progreso', 'completada'];
@@ -14,6 +14,16 @@ const STATUS_ICONS: Record<TaskStatus, string> = {
   completada:  'task_alt',
 };
 
+const CATEGORY_OPTIONS = [
+  { value: 'tarea',    label: 'Tarea',    tab: 'tareas' },
+  { value: 'pendiente',label: 'Pendiente',tab: 'tareas' },
+  { value: 'nota',     label: 'Nota',     tab: 'notas'  },
+  { value: 'personal', label: 'Personal', tab: 'notas'  },
+  { value: 'trabajo',  label: 'Trabajo',  tab: 'notas'  },
+  { value: 'idea',     label: 'Idea',     tab: 'ideas'  },
+  { value: 'prompt',   label: 'Prompt',   tab: 'ideas'  },
+];
+
 function nextStatus(current: TaskStatus): TaskStatus {
   const idx = STATUS_CYCLE.indexOf(current);
   return STATUS_CYCLE[(idx + 1) % STATUS_CYCLE.length];
@@ -22,6 +32,10 @@ function nextStatus(current: TaskStatus): TaskStatus {
 export function NoteCard({ note }: { note: Note }) {
   const [copied, setCopied] = useState(false);
   const [expanded, setExpanded] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [editTitle, setEditTitle] = useState(note.title);
+  const [editContent, setEditContent] = useState(note.content);
+  const [editCategory, setEditCategory] = useState<string>(note.category);
   const [isPending, startTransition] = useTransition();
 
   const isTask = getTab(note.category) === 'tareas';
@@ -50,11 +64,92 @@ export function NoteCard({ note }: { note: Note }) {
     startTransition(async () => { await updateNoteStatus(note.id, next); });
   };
 
+  const handleEditOpen = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setEditTitle(note.title);
+    setEditContent(note.content);
+    setEditCategory(note.category);
+    setEditing(true);
+  };
+
+  const handleEditSave = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    startTransition(async () => {
+      await updateNote(note.id, { title: editTitle, content: editContent, category: editCategory });
+      setEditing(false);
+    });
+  };
+
+  const handleEditCancel = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setEditing(false);
+  };
+
   const preview = note.content.slice(0, 200);
   const hasMore = note.content.length > 200;
   const date = note.createdAt
     ? new Date(note.createdAt).toLocaleDateString('es-AR', { day: 'numeric', month: 'short', year: 'numeric' })
     : '';
+
+  // Edit mode
+  if (editing) {
+    return (
+      <div className="border rounded-2xl p-4 bg-white/[0.04] border-primary-500/30" onClick={e => e.stopPropagation()}>
+        <div className="space-y-3">
+          {/* Título */}
+          <input
+            type="text"
+            value={editTitle}
+            onChange={e => setEditTitle(e.target.value)}
+            placeholder="Título"
+            className="input-dark w-full text-sm font-semibold"
+            autoFocus
+          />
+
+          {/* Categoría */}
+          <select
+            value={editCategory}
+            onChange={e => setEditCategory(e.target.value)}
+            className="input-dark w-full text-sm"
+          >
+            {CATEGORY_OPTIONS.map(opt => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label} ({opt.tab})
+              </option>
+            ))}
+          </select>
+
+          {/* Contenido */}
+          <textarea
+            value={editContent}
+            onChange={e => setEditContent(e.target.value)}
+            placeholder="Contenido..."
+            rows={5}
+            className="input-dark w-full text-sm resize-none"
+          />
+
+          {/* Acciones */}
+          <div className="flex gap-2 justify-end">
+            <button
+              onClick={handleEditCancel}
+              disabled={isPending}
+              className="px-4 py-1.5 rounded-xl text-xs font-semibold text-slate-400 hover:text-white transition-colors"
+            >
+              Cancelar
+            </button>
+            <button
+              onClick={handleEditSave}
+              disabled={isPending || !editTitle.trim()}
+              className="px-4 py-1.5 rounded-xl text-xs font-semibold transition-colors"
+              style={{ background: 'rgba(13,242,242,0.15)', color: '#0df2f2', border: '1px solid rgba(13,242,242,0.25)' }}
+            >
+              {isPending ? 'Guardando…' : 'Guardar'}
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -137,6 +232,9 @@ export function NoteCard({ note }: { note: Note }) {
 
         {/* Acciones */}
         <div className="flex items-center gap-1 flex-shrink-0" onClick={e => e.stopPropagation()}>
+          <button onClick={handleEditOpen} className="text-slate-500 hover:text-primary-400 p-1.5 rounded-xl transition-colors" title="Editar">
+            <span className="material-symbols-outlined text-lg" style={{ fontVariationSettings: "'FILL' 0" }}>edit</span>
+          </button>
           <button onClick={handleCopy} className="text-slate-500 hover:text-primary-400 p-1.5 rounded-xl transition-colors" title="Copiar">
             <span className="material-symbols-outlined text-lg"
               style={{ fontVariationSettings: copied ? "'FILL' 1" : "'FILL' 0", color: copied ? '#0df2f2' : undefined }}>
