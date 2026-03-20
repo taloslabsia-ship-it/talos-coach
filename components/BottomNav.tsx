@@ -3,14 +3,13 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { ProfileMenu } from './ProfileMenu';
-
 const NAV = [
-  { href: '/',        label: 'Inicio',  icon: 'grid_view' },
-  { href: '/habits',  label: 'Hábitos', icon: 'task_alt' },
-  { href: '/agenda',  label: 'Agenda',  icon: 'calendar_month' },
-  { href: '/diary',   label: 'Diario',  icon: 'edit_note' },
-  { href: '/notes',   label: 'Notas',   icon: 'sticky_note_2' },
+  { href: '/',          label: 'Inicio',   icon: 'grid_view' },
+  { href: '/habits',    label: 'Hábitos',  icon: 'task_alt' },
+  { href: '/agenda',    label: 'Agenda',   icon: 'calendar_month' },
+  { href: '/diary',     label: 'Diario',   icon: 'edit_note' },
+  { href: '/notes',     label: 'Notas',    icon: 'sticky_note_2' },
+  { href: '/settings',  label: 'Config',   icon: 'settings' },
 ];
 
 export function BottomNav() {
@@ -59,11 +58,6 @@ export function BottomNav() {
           );
         })}
 
-        {/* Perfil — reemplaza Settings en mobile */}
-        <div className="flex flex-col items-center gap-0.5 px-3 py-2">
-          <ProfileMenu />
-          <span className="text-[9px] font-bold uppercase tracking-tight text-slate-500 mt-0.5">Perfil</span>
-        </div>
       </div>
     </nav>
   );
