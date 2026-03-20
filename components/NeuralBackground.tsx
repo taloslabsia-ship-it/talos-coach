@@ -19,7 +19,7 @@ const COLORS = {
   dim: '8, 160, 160',
 };
 
-export function NeuralBackground() {
+export function NeuralBackground({ opacity = 0.7 }: { opacity?: number }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -165,7 +165,7 @@ export function NeuralBackground() {
     <canvas
       ref={canvasRef}
       className="fixed inset-0 pointer-events-none"
-      style={{ zIndex: 0, opacity: 0.7 }}
+      style={{ zIndex: 0, opacity }}
     />
   );
 }
