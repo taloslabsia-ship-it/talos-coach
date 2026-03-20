@@ -1,22 +1,26 @@
 'use client';
 
 import Link from 'next/link';
-import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { ClearCacheButton } from './ClearCacheButton';
+import { ProfileMenu } from './ProfileMenu';
+import type { SessionUser } from '@/lib/types';
 
 const NAV = [
-  { href: '/',             label: 'Inicio',        icon: 'grid_view' },
-  { href: '/habits',       label: 'Hábitos',       icon: 'task_alt' },
-  { href: '/agenda',       label: 'Agenda',        icon: 'calendar_month' },
-  { href: '/diary',        label: 'Diario',        icon: 'edit_note' },
-  { href: '/stats',        label: 'Estadísticas',  icon: 'monitoring' },
-  { href: '/notes',        label: 'Notas',         icon: 'sticky_note_2' },
-  { href: '/settings',     label: 'Configuración', icon: 'tune' },
+  { href: '/',           label: 'Inicio',        icon: 'grid_view' },
+  { href: '/habits',     label: 'Hábitos',       icon: 'task_alt' },
+  { href: '/agenda',     label: 'Agenda',        icon: 'calendar_month' },
+  { href: '/diary',      label: 'Diario',        icon: 'edit_note' },
+  { href: '/stats',      label: 'Estadísticas',  icon: 'monitoring' },
+  { href: '/notes',      label: 'Notas',         icon: 'sticky_note_2' },
 ];
 
-export function Sidebar() {
+interface Props {
+  user?: SessionUser | null;
+}
+
+export function Sidebar({ user }: Props) {
   const pathname = usePathname();
 
   return (
@@ -27,19 +31,10 @@ export function Sidebar() {
         borderColor: 'rgba(13, 242, 242, 0.12)',
       }}
     >
-      {/* Logo */}
+      {/* Logo / Profile button */}
       <div className="px-3 mb-8">
         <div className="flex items-center gap-3">
-          <div className="relative size-10 flex items-center justify-center">
-            <div className="absolute inset-0 orb-glow opacity-60 rounded-full" />
-            <Image 
-              src="/icon-192.png" 
-              alt="TALOS Logo" 
-              width={40} 
-              height={40} 
-              className="relative z-10 rounded-xl"
-            />
-          </div>
+          <ProfileMenu name={user?.name} email={user?.email} />
           <div>
             <p className="text-white font-black text-sm leading-none tracking-tight">TALOS</p>
             <p className="text-primary-500/60 text-[10px] mt-0.5 uppercase tracking-widest font-semibold">Asistente</p>

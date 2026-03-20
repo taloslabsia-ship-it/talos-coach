@@ -5,6 +5,7 @@ import { BottomNav } from '@/components/BottomNav';
 import { ServiceWorkerRegistration } from '@/components/ServiceWorkerRegistration';
 import { PageTransition } from '@/components/PageTransition';
 import { PullToRefresh } from '@/components/PullToRefresh';
+import { getSessionUser } from '@/lib/session';
 
 export const metadata: Metadata = {
   title: 'Asistente TALOS',
@@ -25,13 +26,15 @@ export const viewport: Viewport = {
   userScalable: false,
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const user = await getSessionUser().catch(() => null);
+
   return (
     <html lang="es">
       <body className="flex h-screen overflow-hidden">
         <ServiceWorkerRegistration />
         {/* Desktop sidebar */}
-        <Sidebar />
+        <Sidebar user={user} />
         {/* Main content */}
         <main className="flex-1 overflow-y-auto">
           <div className="max-w-2xl mx-auto px-4 py-6 pb-24 md:pb-8 md:px-6 md:py-8 md:max-w-5xl">

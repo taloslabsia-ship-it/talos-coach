@@ -3,14 +3,14 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
+import { ProfileMenu } from './ProfileMenu';
 
 const NAV = [
-  { href: '/',          label: 'Inicio',  icon: 'grid_view' },
-  { href: '/habits',    label: 'Hábitos', icon: 'task_alt' },
-  { href: '/agenda',    label: 'Agenda',  icon: 'calendar_month' },
-  { href: '/diary',     label: 'Diario',  icon: 'edit_note' },
-  { href: '/notes',     label: 'Notas',   icon: 'sticky_note_2' },
-  { href: '/settings',  label: 'Config',  icon: 'tune' },
+  { href: '/',        label: 'Inicio',  icon: 'grid_view' },
+  { href: '/habits',  label: 'Hábitos', icon: 'task_alt' },
+  { href: '/agenda',  label: 'Agenda',  icon: 'calendar_month' },
+  { href: '/diary',   label: 'Diario',  icon: 'edit_note' },
+  { href: '/notes',   label: 'Notas',   icon: 'sticky_note_2' },
 ];
 
 export function BottomNav() {
@@ -33,7 +33,6 @@ export function BottomNav() {
                 active ? 'text-primary-500' : 'text-slate-500'
               )}
             >
-              {/* Pill indicador activo */}
               {active && (
                 <span
                   className="absolute inset-0 rounded-2xl"
@@ -53,12 +52,18 @@ export function BottomNav() {
               >
                 {icon}
               </span>
-              <span className={cn('text-[9px] font-bold uppercase tracking-tight relative z-10 transition-all duration-200', active ? 'neon-text' : '')}>
+              <span className={cn('text-[9px] font-bold uppercase tracking-tight relative z-10', active ? 'neon-text' : '')}>
                 {label}
               </span>
             </Link>
           );
         })}
+
+        {/* Perfil — reemplaza Settings en mobile */}
+        <div className="flex flex-col items-center gap-0.5 px-3 py-2">
+          <ProfileMenu />
+          <span className="text-[9px] font-bold uppercase tracking-tight text-slate-500 mt-0.5">Perfil</span>
+        </div>
       </div>
     </nav>
   );

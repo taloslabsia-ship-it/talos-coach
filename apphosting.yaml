@@ -14,3 +14,7 @@ env:
     availability:
       - BUILD
       - RUNTIME
+  - variable: WEBHOOK_SECRET
+    secret: WEBHOOK_SECRET
+    availability:
+      - RUNTIME
