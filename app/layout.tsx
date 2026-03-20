@@ -1,10 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
-import { Sidebar } from '@/components/Sidebar';
-import { BottomNav } from '@/components/BottomNav';
+import { NavWrapper } from '@/components/NavWrapper';
 import { ServiceWorkerRegistration } from '@/components/ServiceWorkerRegistration';
-import { PageTransition } from '@/components/PageTransition';
-import { PullToRefresh } from '@/components/PullToRefresh';
 import { getSessionUser } from '@/lib/session';
 
 export const metadata: Metadata = {
@@ -33,18 +30,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <html lang="es">
       <body className="flex h-screen overflow-hidden">
         <ServiceWorkerRegistration />
-        {/* Desktop sidebar */}
-        <Sidebar user={user} />
-        {/* Main content */}
-        <main className="flex-1 overflow-y-auto">
-          <div className="max-w-2xl mx-auto px-4 py-6 pb-24 md:pb-8 md:px-6 md:py-8 md:max-w-5xl">
-            <PageTransition>{children}</PageTransition>
-          </div>
-        </main>
-        {/* Mobile pull-to-refresh */}
-        <PullToRefresh />
-        {/* Mobile bottom nav */}
-        <BottomNav />
+        <NavWrapper user={user}>{children}</NavWrapper>
       </body>
     </html>
   );
