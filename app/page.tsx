@@ -137,13 +137,13 @@ export default async function HomePage() {
         {/* Header */}
         <header className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="relative size-12 flex items-center justify-center">
-              <div className="absolute inset-0 orb-glow opacity-50 rounded-full" />
-              <Image 
-                src="/icon-192.png" 
-                alt="TALOS Logo" 
-                width={44} 
-                height={44} 
+            <div className="relative size-12 flex items-center justify-center animate-float">
+              <div className="absolute inset-0 orb-glow opacity-50 rounded-full animate-glow-pulse" />
+              <Image
+                src="/icon-192.png"
+                alt="TALOS Logo"
+                width={44}
+                height={44}
                 className="relative z-10 rounded-xl"
               />
             </div>
@@ -198,7 +198,11 @@ export default async function HomePage() {
         <section>
           <h2 className="section-title mb-3">Hábitos de hoy</h2>
           <div className="space-y-2">
-            {habitsWithLogs.map(h => <HabitCardMini key={h.id} habit={h} />)}
+            {habitsWithLogs.map((h, i) => (
+              <div key={h.id} className="animate-in" style={{ animationDelay: `${i * 60}ms` }}>
+                <HabitCardMini habit={h} />
+              </div>
+            ))}
             {habitsWithLogs.length === 0 && (
               <p className="text-slate-500 text-sm text-center py-6">No hay hábitos configurados.</p>
             )}
