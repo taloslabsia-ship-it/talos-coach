@@ -22,7 +22,17 @@ async function getAllNotes(): Promise<Note[]> {
 }
 
 export default async function NotesPage() {
-  const notes = await getAllNotes();
+  let notes: Note[] = [];
+  try {
+    notes = await getAllNotes();
+  } catch (e: any) {
+    return (
+      <div className="p-6 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-400 space-y-2">
+        <p className="font-bold">Error cargando notas</p>
+        <p className="text-sm font-mono">{e?.message}</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-5">

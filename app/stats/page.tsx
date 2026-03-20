@@ -76,10 +76,17 @@ async function getStatsData() {
 }
 
 export default async function StatsPage() {
-  const [{ dayStats, ranked, totalDays }, streak] = await Promise.all([
-    getStatsData(),
-    getStreak(),
-  ]);
+  let dayStats: DayStats[] = [], ranked: any[] = [], totalDays = 0, streak = 0;
+  try {
+    ([{ dayStats, ranked, totalDays }, streak] = await Promise.all([getStatsData(), getStreak()]));
+  } catch (e: any) {
+    return (
+      <div className="p-6 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-400 space-y-2">
+        <p className="font-bold">Error cargando estadísticas</p>
+        <p className="text-sm font-mono">{e?.message}</p>
+      </div>
+    );
+  }
 
   const last7 = dayStats.slice(-7);
   const avgPct = dayStats.length > 0

@@ -28,7 +28,19 @@ async function getDiaryData() {
 }
 
 export default async function DiaryPage() {
-  const { todayEntry, entries, today } = await getDiaryData();
+  let todayEntry: DiaryEntry | null = null;
+  let entries: DiaryEntry[] = [];
+  let today = '';
+  try {
+    ({ todayEntry, entries, today } = await getDiaryData());
+  } catch (e: any) {
+    return (
+      <div className="p-6 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-400 space-y-2">
+        <p className="font-bold">Error cargando diario</p>
+        <p className="text-sm font-mono">{e?.message}</p>
+      </div>
+    );
+  }
   const pastEntries = entries.filter(e => e.date !== today);
 
   return (
