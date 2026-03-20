@@ -1,19 +1,21 @@
-import { db, toISO } from '@/lib/firebase';
+import { toISO, userDb } from '@/lib/firebase';
 import { toDateString } from '@/lib/utils';
 import { HabitCard } from '@/components/HabitCard';
 import { AddHabitButton } from '@/components/AddHabitButton';
+import { requireActiveSession } from '@/lib/session';
 import type { Habit, HabitLog, HabitWithLog } from '@/lib/types';
 
 export const dynamic = 'force-dynamic';
 
-async function getHabitsToday() {
+async function getHabitsToday(uid: string) {
   const today = toDateString(new Date());
+  const udb = userDb(uid);
 
-  const habitsSnap = await db.collection('habits')
+  const habitsSnap = await udb.habits()
     .where('active', '==', true)
     .orderBy('sortOrder')
     .get();
-  
+
   const habits = habitsSnap.docs.map(d => {
     const data = d.data();
     return {
@@ -28,10 +30,10 @@ async function getHabitsToday() {
     } as Habit;
   });
 
-  const logsSnap = await db.collection('habit_logs')
+  const logsSnap = await udb.habitLogs()
     .where('date', '==', today)
     .get();
-  
+
   const logs = logsSnap.docs.map(d => {
     const data = d.data();
     return {
@@ -53,7 +55,8 @@ async function getHabitsToday() {
 
 export default async function HabitsPage() {
   try {
-    const habits = await getHabitsToday();
+    const { uid } = await requireActiveSession();
+    const habits = await getHabitsToday(uid);
     const today = toDateString(new Date());
     const completed = habits.filter(h => h.log?.completed).length;
 

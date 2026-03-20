@@ -19,6 +19,21 @@ initAdmin();
 
 export const db = getFirestore();
 
+// Helper: devuelve referencias de colecciones scoped a un usuario
+export function userDb(uid: string) {
+  const base = db.collection('users').doc(uid);
+  return {
+    habits:    () => base.collection('habits'),
+    habitLogs: () => base.collection('habit_logs'),
+    notes:     () => base.collection('notes'),
+    diary:     () => base.collection('diary_entries'),
+    reminders: () => base.collection('reminders'),
+    config:    (docId: string) => base.collection('config').doc(docId),
+    phrases:   () => db.collection('motivational_phrases'), // compartido entre usuarios
+    userDoc:   () => base,
+  };
+}
+
 // Helper: convierte Firestore Timestamp o string a ISO string
 export function toISO(val: unknown): string | null {
   if (!val) return null;

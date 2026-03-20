@@ -1,10 +1,12 @@
-import { db, toISO } from '@/lib/firebase';
+import { toISO, userDb } from '@/lib/firebase';
 import { AgendaClient } from '@/components/AgendaClient';
+import { requireActiveSession } from '@/lib/session';
 
 export const dynamic = 'force-dynamic';
 
-async function getReminders() {
-  const snap = await db.collection('reminders').get();
+async function getReminders(uid: string) {
+  const udb = userDb(uid);
+  const snap = await udb.reminders().get();
 
   const today = new Date().toISOString().split('T')[0];
 
@@ -33,7 +35,8 @@ async function getReminders() {
 
 export default async function AgendaPage() {
   try {
-    const { proximos, pasados } = await getReminders();
+    const { uid } = await requireActiveSession();
+    const { proximos, pasados } = await getReminders(uid);
     const total = proximos.length + pasados.length;
 
     return (

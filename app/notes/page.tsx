@@ -1,11 +1,13 @@
 export const dynamic = 'force-dynamic';
 
-import { db, toISO } from '@/lib/firebase';
+import { toISO, userDb } from '@/lib/firebase';
 import { NotesClient } from '@/components/NotesClient';
+import { requireActiveSession } from '@/lib/session';
 import type { Note } from '@/lib/types';
 
-async function getAllNotes(): Promise<Note[]> {
-  const snap = await db.collection('notes').orderBy('createdAt', 'desc').limit(200).get();
+async function getAllNotes(uid: string): Promise<Note[]> {
+  const udb = userDb(uid);
+  const snap = await udb.notes().orderBy('createdAt', 'desc').limit(200).get();
   return snap.docs.map(d => {
     const data = d.data();
     return {
@@ -24,7 +26,8 @@ async function getAllNotes(): Promise<Note[]> {
 export default async function NotesPage() {
   let notes: Note[] = [];
   try {
-    notes = await getAllNotes();
+    const { uid } = await requireActiveSession();
+    notes = await getAllNotes(uid);
   } catch (e: any) {
     return (
       <div className="p-6 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-400 space-y-2">

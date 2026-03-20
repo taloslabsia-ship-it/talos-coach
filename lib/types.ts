@@ -73,6 +73,20 @@ export interface UserProfile {
   onboardingDone: boolean;
 }
 
+export type SubscriptionStatus = 'trial' | 'active' | 'expired' | 'blocked';
+
+export interface Subscription {
+  status: SubscriptionStatus;
+  expiresAt: string | null;
+  plan: 'free' | 'plus';
+}
+
+export interface SessionUser {
+  uid: string;
+  email: string;
+  name?: string;
+}
+
 // Stats helpers
 export interface DayStats {
   date: string;

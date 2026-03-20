@@ -2,22 +2,23 @@ export const dynamic = 'force-dynamic';
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { db, toISO } from '@/lib/firebase';
+import { toISO, userDb } from '@/lib/firebase';
 import { toDateString, getLast7Days, formatDate } from '@/lib/utils';
 import { HabitCardMini } from '@/components/HabitCardMini';
 import { WeekCalendar } from '@/components/WeekCalendar';
-import { getUserProfile } from '@/app/actions';
+import { requireActiveSession } from '@/lib/session';
 import type { Habit, HabitLog, HabitWithLog } from '@/lib/types';
 
-async function getTodayData() {
+async function getTodayData(uid: string) {
   const today = toDateString(new Date());
   const last7 = getLast7Days();
+  const udb = userDb(uid);
 
-  const habitsSnap = await db.collection('habits')
+  const habitsSnap = await udb.habits()
     .where('active', '==', true)
     .orderBy('sortOrder')
     .get();
-  
+
   const habits = habitsSnap.docs.map(d => {
     const data = d.data();
     return {
@@ -32,10 +33,10 @@ async function getTodayData() {
     } as Habit;
   });
 
-  const logsSnap = await db.collection('habit_logs')
+  const logsSnap = await udb.habitLogs()
     .where('date', '==', today)
     .get();
-  
+
   const todayLogs = logsSnap.docs.map(d => {
     const data = d.data();
     return {
@@ -49,19 +50,19 @@ async function getTodayData() {
     } as HabitLog;
   });
 
-  const weekLogsSnap = await db.collection('habit_logs')
+  const weekLogsSnap = await udb.habitLogs()
     .where('date', 'in', last7)
     .get();
-  
+
   const weekLogs = weekLogsSnap.docs.map(d => {
     const data = d.data();
-    return { 
-      date: data.date, 
-      completed: !!data.completed 
+    return {
+      date: data.date,
+      completed: !!data.completed
     };
   }) as any[];
 
-  const phrasesSnap = await db.collection('motivational_phrases').limit(20).get();
+  const phrasesSnap = await udb.phrases().limit(20).get();
   const phrases = phrasesSnap.docs.map(d => {
     const data = d.data();
     return {
@@ -79,8 +80,9 @@ async function getTodayData() {
   return { habitsWithLogs, weekLogs, phrase, today };
 }
 
-async function getStreak(): Promise<number> {
-  const logsSnap = await db.collection('habit_logs')
+async function getStreak(uid: string): Promise<number> {
+  const udb = userDb(uid);
+  const logsSnap = await udb.habitLogs()
     .where('completed', '==', true)
     .orderBy('date', 'desc')
     .limit(200)
@@ -104,8 +106,11 @@ async function getStreak(): Promise<number> {
 
 export default async function HomePage() {
   try {
-    const [{ habitsWithLogs, weekLogs, phrase, today }, streak, profile] =
-      await Promise.all([getTodayData(), getStreak(), getUserProfile().catch(() => null)]);
+    const { uid } = await requireActiveSession();
+    const profileDoc = await userDb(uid).config('profile').get();
+    const profile = profileDoc.exists ? profileDoc.data() : null;
+    const [{ habitsWithLogs, weekLogs, phrase, today }, streak] =
+      await Promise.all([getTodayData(uid), getStreak(uid)]);
 
     const completed = habitsWithLogs.filter(h => h.log?.completed).length;
     const total = habitsWithLogs.length;

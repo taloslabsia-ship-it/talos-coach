@@ -1,21 +1,23 @@
-import { db, toISO } from '@/lib/firebase';
+import { toISO, userDb } from '@/lib/firebase';
 import { toDateString, formatDate } from '@/lib/utils';
 import { DiaryEditor } from '@/components/DiaryEditor';
 import { DiaryEntryCard } from '@/components/DiaryEntryCard';
 import { DiaryAnalysis } from '@/components/DiaryAnalysis';
+import { requireActiveSession } from '@/lib/session';
 import type { DiaryEntry } from '@/lib/types';
 
 export const dynamic = 'force-dynamic';
 
-async function getDiaryData() {
+async function getDiaryData(uid: string) {
   const today = toDateString(new Date());
+  const udb = userDb(uid);
 
-  const todayDoc = await db.collection('diary_entries').doc(today).get();
+  const todayDoc = await udb.diary().doc(today).get();
   const todayEntry = todayDoc.exists
     ? (() => { const d = todayDoc.data()!; return { id: todayDoc.id, ...d, createdAt: toISO(d.createdAt) ?? '', updatedAt: toISO(d.updatedAt) ?? '' } as DiaryEntry; })()
     : null;
 
-  const entriesSnap = await db.collection('diary_entries')
+  const entriesSnap = await udb.diary()
     .orderBy('date', 'desc')
     .limit(30)
     .get();
@@ -32,7 +34,8 @@ export default async function DiaryPage() {
   let entries: DiaryEntry[] = [];
   let today = '';
   try {
-    ({ todayEntry, entries, today } = await getDiaryData());
+    const { uid } = await requireActiveSession();
+    ({ todayEntry, entries, today } = await getDiaryData(uid));
   } catch (e: any) {
     return (
       <div className="p-6 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-400 space-y-2">

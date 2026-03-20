@@ -1,7 +1,8 @@
-import { db } from '@/lib/firebase';
+import { userDb } from '@/lib/firebase';
 import { getLast30Days, toDateString, cn } from '@/lib/utils';
 import { WeekBarChart } from '@/components/WeekBarChart';
 import { MonthHeatmap } from '@/components/MonthHeatmap';
+import { requireActiveSession } from '@/lib/session';
 import type { Habit, HabitLog, DayStats } from '@/lib/types';
 
 export const dynamic = 'force-dynamic';
@@ -13,8 +14,9 @@ const BADGES = [
   { days: 100, emoji: '👑', label: '100 días', color: 'border-purple-600/50 bg-purple-950/20', textColor: 'text-purple-400' },
 ];
 
-async function getStreak(): Promise<number> {
-  const logsSnap = await db.collection('habit_logs')
+async function getStreak(uid: string): Promise<number> {
+  const udb = userDb(uid);
+  const logsSnap = await udb.habitLogs()
     .where('completed', '==', true)
     .orderBy('date', 'desc')
     .limit(300)
@@ -36,14 +38,15 @@ async function getStreak(): Promise<number> {
   return streak;
 }
 
-async function getStatsData() {
+async function getStatsData(uid: string) {
   const last30 = getLast30Days();
+  const udb = userDb(uid);
 
-  const habitsSnap = await db.collection('habits').where('active', '==', true).get();
+  const habitsSnap = await udb.habits().where('active', '==', true).get();
   const habits = habitsSnap.docs.map(d => ({ id: d.id, ...d.data() } as Habit));
   const totalHabits = habits.length;
 
-  const logsSnap = await db.collection('habit_logs')
+  const logsSnap = await udb.habitLogs()
     .where('date', 'in', last30)
     .get();
   const logs = logsSnap.docs.map(d => ({ id: d.id, ...d.data() } as HabitLog));
@@ -69,7 +72,7 @@ async function getStatsData() {
     .map(h => ({ ...h, count: habitCounts[h.id] ?? 0 }))
     .sort((a, b) => b.count - a.count);
 
-  const allLogsSnap = await db.collection('habit_logs').where('completed', '==', true).get();
+  const allLogsSnap = await udb.habitLogs().where('completed', '==', true).get();
   const totalDays = new Set(allLogsSnap.docs.map(d => d.data().date as string)).size;
 
   return { dayStats, ranked, totalDays };
@@ -78,7 +81,8 @@ async function getStatsData() {
 export default async function StatsPage() {
   let dayStats: DayStats[] = [], ranked: any[] = [], totalDays = 0, streak = 0;
   try {
-    ([{ dayStats, ranked, totalDays }, streak] = await Promise.all([getStatsData(), getStreak()]));
+    const { uid } = await requireActiveSession();
+    ([{ dayStats, ranked, totalDays }, streak] = await Promise.all([getStatsData(uid), getStreak(uid)]));
   } catch (e: any) {
     return (
       <div className="p-6 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-400 space-y-2">
