@@ -19,7 +19,7 @@ export function NavWrapper({ user, children }: Props) {
   const showNav = !NO_NAV.some(p => pathname.startsWith(p));
 
   if (!showNav) {
-    return <>{children}</>;
+    return <div className="w-full h-full overflow-y-auto">{children}</div>;
   }
 
   return (
