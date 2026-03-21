@@ -18,7 +18,3 @@ env:
     secret: WEBHOOK_SECRET
     availability:
       - RUNTIME
-  - variable: TALOS_USER_UID
-    value: QXGkRXR6sZYJ5vYopNISy3wiSxN2
-    availability:
-      - RUNTIME

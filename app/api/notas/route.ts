@@ -7,10 +7,10 @@ function checkAuth(req: NextRequest) {
   return key === process.env.TALOS_API_SECRET;
 }
 
+const TALOS_USER_UID = process.env.TALOS_USER_UID || 'QXGkRXR6sZYJ5vYopNISy3wiSxN2';
+
 function getUid() {
-  const uid = process.env.TALOS_USER_UID;
-  if (!uid) throw new Error('TALOS_USER_UID no configurado');
-  return uid;
+  return TALOS_USER_UID;
 }
 
 export async function GET(req: NextRequest) {
