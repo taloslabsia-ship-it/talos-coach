@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic';
 
 import { getUserProfile, getIntegrationsStatus } from '@/app/actions';
 import { SettingsClient } from '@/components/SettingsClient';
+import { requireSession } from '@/lib/session';
 
 const DEFAULT_INTEGRATIONS = {
   calendarConnected: false,
@@ -12,6 +13,7 @@ const DEFAULT_INTEGRATIONS = {
 };
 
 export default async function SettingsPage() {
+  await requireSession(); // redirect to /login if not authenticated
   const [profile, integrations] = await Promise.all([
     getUserProfile().catch(() => null),
     getIntegrationsStatus().catch(() => DEFAULT_INTEGRATIONS),

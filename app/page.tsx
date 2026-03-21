@@ -235,6 +235,8 @@ export default async function HomePage() {
       </div>
     );
   } catch (error: any) {
+    // Re-throw redirect errors so Next.js can handle them
+    if (error?.digest?.startsWith('NEXT_REDIRECT')) throw error;
     console.error('CRITICAL SERVER ERROR:', error);
     return (
       <div className="p-6 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-400 space-y-4">
