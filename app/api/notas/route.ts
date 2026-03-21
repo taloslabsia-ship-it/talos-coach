@@ -1,10 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/firebase';
+import { userDb } from '@/lib/firebase';
 import { FieldValue } from 'firebase-admin/firestore';
 
 function checkAuth(req: NextRequest) {
   const key = req.headers.get('x-api-key') ?? req.nextUrl.searchParams.get('api_key');
   return key === process.env.TALOS_API_SECRET;
+}
+
+function getUid() {
+  const uid = process.env.TALOS_USER_UID;
+  if (!uid) throw new Error('TALOS_USER_UID no configurado');
+  return uid;
 }
 
 export async function GET(req: NextRequest) {
@@ -14,10 +20,11 @@ export async function GET(req: NextRequest) {
   const limit = parseInt(req.nextUrl.searchParams.get('limit') ?? '50');
 
   try {
-    let q = db.collection('notes').orderBy('createdAt', 'desc').limit(limit);
-    if (category && category !== 'all') {
-      q = db.collection('notes').where('category', '==', category).orderBy('createdAt', 'desc').limit(limit);
-    }
+    const udb = userDb(getUid());
+    const base = udb.notes();
+    const q = category && category !== 'all'
+      ? base.where('category', '==', category).orderBy('createdAt', 'desc').limit(limit)
+      : base.orderBy('createdAt', 'desc').limit(limit);
 
     const snap = await q.get();
     const notes = snap.docs.map(d => ({ id: d.id, ...d.data() }));
@@ -37,7 +44,8 @@ export async function POST(req: NextRequest) {
   if (!title || !content) return NextResponse.json({ error: 'Se requieren title y content' }, { status: 400 });
 
   try {
-    const ref = await db.collection('notes').add({
+    const udb = userDb(getUid());
+    const ref = await udb.notes().add({
       title,
       content,
       category,

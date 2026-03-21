@@ -37,6 +37,7 @@ export default async function DiaryPage() {
     const { uid } = await requireActiveSession();
     ({ todayEntry, entries, today } = await getDiaryData(uid));
   } catch (e: any) {
+    if (e?.digest?.startsWith('NEXT_REDIRECT')) throw e;
     return (
       <div className="p-6 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-400 space-y-2">
         <p className="font-bold">Error cargando diario</p>
