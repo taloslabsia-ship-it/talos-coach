@@ -13,7 +13,14 @@ export async function getUserProfile(): Promise<UserProfile | null> {
   const udb = userDb(uid);
   const doc = await udb.config('profile').get();
   if (!doc.exists) return null;
-  return doc.data() as UserProfile;
+  const d = doc.data()!;
+  return {
+    name: d.name ?? '',
+    botPersonality: d.botPersonality ?? 'equilibrado',
+    quietStart: d.quietStart ?? '22:00',
+    quietEnd: d.quietEnd ?? '08:00',
+    onboardingDone: d.onboardingDone ?? false,
+  };
 }
 
 export async function saveUserProfile(profile: Partial<UserProfile>) {
