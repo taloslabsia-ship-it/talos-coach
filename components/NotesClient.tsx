@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect } from 'react';
 import { collection, query, orderBy, limit, onSnapshot } from 'firebase/firestore';
+import { onAuthStateChanged } from 'firebase/auth';
 import { clientDb, clientAuth } from '@/lib/firebase-client';
 import { NoteCard } from './NoteCard';
 import { getTab } from '@/lib/utils';
@@ -24,36 +25,40 @@ export function NotesClient({ notes: initialNotes }: Props) {
 
   // Listener en tiempo real — actualiza instantáneamente cuando el bot guarda una nota
   useEffect(() => {
-    const uid = clientAuth.currentUser?.uid;
-    if (!uid) return;
+    let unsubSnapshot: (() => void) | null = null;
 
-    const q = query(
-      collection(clientDb, 'users', uid, 'notes'),
-      orderBy('createdAt', 'desc'),
-      limit(200)
-    );
+    const unsubAuth = onAuthStateChanged(clientAuth, (user) => {
+      if (unsubSnapshot) { unsubSnapshot(); unsubSnapshot = null; }
+      if (!user) return;
 
-    const unsub = onSnapshot(q, (snap) => {
-      const updated: Note[] = snap.docs.map(d => {
-        const data = d.data();
-        const createdAt = data.createdAt?.toDate?.()?.toISOString() ?? data.createdAt ?? '';
-        const updatedAt = data.updatedAt?.toDate?.()?.toISOString() ?? data.updatedAt ?? '';
-        return {
-          id: d.id,
-          title: data.title ?? '',
-          content: data.content ?? '',
-          category: data.category ?? 'personal',
-          source: data.source ?? 'manual',
-          completed: data.completed ?? false,
-          status: data.status,
-          createdAt,
-          updatedAt,
-        } as Note;
+      const q = query(
+        collection(clientDb, 'users', user.uid, 'notes'),
+        orderBy('createdAt', 'desc'),
+        limit(200)
+      );
+
+      unsubSnapshot = onSnapshot(q, (snap) => {
+        const updated: Note[] = snap.docs.map(d => {
+          const data = d.data();
+          const createdAt = data.createdAt?.toDate?.()?.toISOString() ?? data.createdAt ?? '';
+          const updatedAt = data.updatedAt?.toDate?.()?.toISOString() ?? data.updatedAt ?? '';
+          return {
+            id: d.id,
+            title: data.title ?? '',
+            content: data.content ?? '',
+            category: data.category ?? 'personal',
+            source: data.source ?? 'manual',
+            completed: data.completed ?? false,
+            status: data.status,
+            createdAt,
+            updatedAt,
+          } as Note;
+        });
+        setNotes(updated);
       });
-      setNotes(updated);
     });
 
-    return () => unsub();
+    return () => { unsubAuth(); if (unsubSnapshot) unsubSnapshot(); };
   }, []);
 
   const counts = useMemo(() => ({
