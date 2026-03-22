@@ -25,8 +25,10 @@ async function getAllNotes(uid: string): Promise<Note[]> {
 
 export default async function NotesPage() {
   let notes: Note[] = [];
+  let uid = '';
   try {
-    const { uid } = await requireActiveSession();
+    const session = await requireActiveSession();
+    uid = session.uid;
     notes = await getAllNotes(uid);
   } catch (e: any) {
     return (
@@ -54,7 +56,7 @@ export default async function NotesPage() {
         </div>
       </header>
 
-      <NotesClient notes={notes} />
+      <NotesClient notes={notes} uid={uid} />
     </div>
   );
 }
