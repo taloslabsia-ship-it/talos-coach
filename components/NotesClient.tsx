@@ -2,7 +2,8 @@
 
 import { useState, useMemo, useEffect } from 'react';
 import { collection, query, orderBy, limit, onSnapshot } from 'firebase/firestore';
-import { clientDb } from '@/lib/firebase-client';
+import { signInWithCustomToken } from 'firebase/auth';
+import { clientDb, clientAuth } from '@/lib/firebase-client';
 import { NoteCard } from './NoteCard';
 import { getTab } from '@/lib/utils';
 import type { Note } from '@/lib/types';
@@ -22,37 +23,55 @@ export function NotesClient({ notes: initialNotes, uid }: Props) {
   const [activeTab, setActiveTab] = useState<Tab>('tareas');
   const [search, setSearch]       = useState('');
 
-  // Listener en tiempo real — usa el UID del servidor, no depende de Firebase Client Auth
+  // Listener en tiempo real — autentica el cliente con custom token si hace falta
   useEffect(() => {
     if (!uid) return;
+    let unsub: (() => void) | null = null;
 
-    const q = query(
-      collection(clientDb, 'users', uid, 'notes'),
-      orderBy('createdAt', 'desc'),
-      limit(200)
-    );
+    async function startListener() {
+      // Si el cliente no tiene auth, pedimos un custom token al servidor
+      if (!clientAuth.currentUser) {
+        try {
+          const res = await fetch('/api/auth/client-token');
+          if (res.ok) {
+            const { token } = await res.json();
+            await signInWithCustomToken(clientAuth, token);
+          }
+        } catch {
+          // Si falla, el listener no arranca pero el SSR ya mostró los datos
+          return;
+        }
+      }
 
-    const unsub = onSnapshot(q, (snap) => {
-      const updated: Note[] = snap.docs.map(d => {
-        const data = d.data();
-        const createdAt = data.createdAt?.toDate?.()?.toISOString() ?? data.createdAt ?? '';
-        const updatedAt = data.updatedAt?.toDate?.()?.toISOString() ?? data.updatedAt ?? '';
-        return {
-          id: d.id,
-          title: data.title ?? '',
-          content: data.content ?? '',
-          category: data.category ?? 'personal',
-          source: data.source ?? 'manual',
-          completed: data.completed ?? false,
-          status: data.status,
-          createdAt,
-          updatedAt,
-        } as Note;
+      const q = query(
+        collection(clientDb, 'users', uid, 'notes'),
+        orderBy('createdAt', 'desc'),
+        limit(200)
+      );
+
+      unsub = onSnapshot(q, (snap) => {
+        const updated: Note[] = snap.docs.map(d => {
+          const data = d.data();
+          const createdAt = data.createdAt?.toDate?.()?.toISOString() ?? data.createdAt ?? '';
+          const updatedAt = data.updatedAt?.toDate?.()?.toISOString() ?? data.updatedAt ?? '';
+          return {
+            id: d.id,
+            title: data.title ?? '',
+            content: data.content ?? '',
+            category: data.category ?? 'personal',
+            source: data.source ?? 'manual',
+            completed: data.completed ?? false,
+            status: data.status,
+            createdAt,
+            updatedAt,
+          } as Note;
+        });
+        setNotes(updated);
       });
-      setNotes(updated);
-    });
+    }
 
-    return () => unsub();
+    startListener();
+    return () => { if (unsub) unsub(); };
   }, [uid]);
 
   const counts = useMemo(() => ({
