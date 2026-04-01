@@ -5,6 +5,7 @@ import { useTransition } from 'react';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
+import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 
 export default function ConfigPage() {
   const [apiKey, setApiKey] = useState('');
@@ -12,7 +13,10 @@ export default function ConfigPage() {
   const [saved, setSaved] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [googleConnected, setGoogleConnected] = useState(false);
+  const [googleEmail, setGoogleEmail] = useState('');
   const [isPending, startTransition] = useTransition();
+  const [isConnectingGoogle, setIsConnectingGoogle] = useState(false);
 
   const auth = getAuth();
   const db = getFirestore();
@@ -21,13 +25,20 @@ export default function ConfigPage() {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         try {
-          const configRef = doc(db, 'users', user.uid, 'config', 'elevenlabs');
-          const docSnap = await getDoc(configRef);
+          const [elevenLabsDoc, googleCalendarDoc] = await Promise.all([
+            getDoc(doc(db, 'users', user.uid, 'config', 'elevenlabs')),
+            getDoc(doc(db, 'users', user.uid, 'config', 'google_oauth')),
+          ]);
 
-          if (docSnap.exists()) {
-            const data = docSnap.data();
+          if (elevenLabsDoc.exists()) {
+            const data = elevenLabsDoc.data();
             setApiKey(data.apiKey || '');
             setVoiceId(data.voiceId || '');
+          }
+
+          if (googleCalendarDoc.exists()) {
+            setGoogleConnected(true);
+            setGoogleEmail(googleCalendarDoc.data()?.email || 'Conectado');
           }
         } catch (err) {
           console.error('Error loading config:', err);
@@ -74,6 +85,35 @@ export default function ConfigPage() {
       }
     });
   };
+
+  const handleConnectGoogle = () => {
+    setIsConnectingGoogle(true);
+    // Redirige al endpoint OAuth que maneja todo el flujo
+    window.location.href = '/api/auth/google-calendar?action=authorize';
+  };
+
+  // Detectar si volvemos de la autenticación
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('google') === 'success') {
+      setGoogleConnected(true);
+      setError('');
+      window.history.replaceState({}, document.title, window.location.pathname);
+      // Recargar config
+      const user = auth.currentUser;
+      if (user) {
+        getDoc(doc(db, 'users', user.uid, 'config', 'google_oauth')).then(docSnap => {
+          if (docSnap.exists()) {
+            setGoogleEmail(docSnap.data().email || 'Conectado');
+          }
+        });
+      }
+    } else if (params.get('google') === 'error') {
+      setError('Error al conectar Google Calendar. Intenta de nuevo.');
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+    setIsConnectingGoogle(false);
+  }, []);
 
   if (loading) {
     return (
@@ -141,6 +181,34 @@ export default function ConfigPage() {
       <p className="text-xs text-slate-500 text-center">
         Una vez guardados, el bot usará esta voz en las próximas respuestas.
       </p>
+
+      {/* Google Calendar Config */}
+      <div className="bg-slate-800/50 border border-slate-700/50 rounded-lg p-6 space-y-4">
+        <h2 className="text-lg font-semibold text-cyan-400">📅 Google Calendar</h2>
+
+        {googleConnected ? (
+          <div className="space-y-3">
+            <div className="p-3 bg-emerald-500/10 border border-emerald-500/30 rounded">
+              <p className="text-sm text-emerald-400">✅ Conectado a Google Calendar</p>
+              <p className="text-xs text-emerald-300 mt-1">{googleEmail}</p>
+            </div>
+            <p className="text-xs text-slate-400">
+              Ahora el bot puede agendar eventos. Prueba diciendo: "Agendá una reunión mañana a las 3pm"
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            <p className="text-sm text-slate-400">Conecta tu Google Calendar para que el bot pueda agendar eventos automáticamente.</p>
+            <button
+              onClick={handleConnectGoogle}
+              disabled={isConnectingGoogle}
+              className="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-medium rounded-lg transition flex items-center justify-center gap-2"
+            >
+              {isConnectingGoogle ? 'Conectando...' : '🔗 Conectar Google'}
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
