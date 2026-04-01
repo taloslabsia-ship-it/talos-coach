@@ -12,6 +12,7 @@ const NAV = [
   { href: '/habits',     label: 'Hábitos',       icon: 'task_alt' },
   { href: '/agenda',     label: 'Agenda',        icon: 'calendar_month' },
   { href: '/diary',      label: 'Diario',        icon: 'edit_note' },
+  { href: '/reflexiones',label: 'Reflexiones',   icon: 'psychology' },
   { href: '/stats',      label: 'Estadísticas',  icon: 'monitoring' },
   { href: '/notes',      label: 'Notas',         icon: 'sticky_note_2' },
 ];
