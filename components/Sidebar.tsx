@@ -15,6 +15,7 @@ const NAV = [
   { href: '/reflexiones',label: 'Reflexiones',   icon: 'psychology' },
   { href: '/stats',      label: 'Estadísticas',  icon: 'monitoring' },
   { href: '/notes',      label: 'Notas',         icon: 'sticky_note_2' },
+  { href: '/configuracion', label: 'Configuración', icon: 'settings' },
 ];
 
 interface Props {
