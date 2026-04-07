@@ -1,5 +1,5 @@
 import { db, userDb, toISO } from '@/lib/firebase';
-import { ReactMarkdown } from 'react-markdown';
+import Markdown from 'react-markdown';
 
 interface Reflection {
   id: string;
@@ -103,7 +103,7 @@ export default async function ReflexionesPage() {
               {analyses[0].weekStart} a {analyses[0].weekEnd} ({analyses[0].reflectionsCount} reflexiones)
             </p>
             <div className="prose prose-invert max-w-none text-sm leading-relaxed">
-              <ReactMarkdown>{analyses[0].analysis}</ReactMarkdown>
+              <Markdown>{analyses[0].analysis}</Markdown>
             </div>
           </div>
 
@@ -120,7 +120,7 @@ export default async function ReflexionesPage() {
                       {analysis.weekStart} a {analysis.weekEnd}
                     </p>
                     <div className="prose prose-invert max-w-none text-xs leading-relaxed">
-                      <ReactMarkdown>{analysis.analysis}</ReactMarkdown>
+                      <Markdown>{analysis.analysis}</Markdown>
                     </div>
                   </div>
                 ))}

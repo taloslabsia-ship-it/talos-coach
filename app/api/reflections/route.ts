@@ -28,7 +28,7 @@ export async function GET(req: NextRequest) {
     }
 
     const snap = await q.get();
-    const reflections = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    const reflections = snap.docs.map((d: any) => ({ id: d.id, ...d.data() }));
     return NextResponse.json({ reflections, total: reflections.length });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
