@@ -230,13 +230,16 @@ export function SettingsClient({ profile, integrations }: Props) {
                   <p className="text-slate-500 text-xs">Crear y gestionar eventos desde el bot</p>
                 </div>
               </div>
-              <StatusBadge ok={integrations.calendarConnected} label={integrations.calendarConnected ? 'Conectado' : 'Sin conectar'} />
+              <div className="flex items-center gap-2">
+                <StatusBadge ok={integrations.calendarConnected} label={integrations.calendarConnected ? 'Conectado' : 'Sin conectar'} />
+                <button
+                  onClick={() => window.location.href = '/api/auth/google/connect'}
+                  className="px-3 py-1 rounded-lg text-xs font-semibold bg-primary-500/20 text-primary-300 border border-primary-500/50 hover:bg-primary-500/30 transition-all"
+                >
+                  {integrations.calendarConnected ? 'Reconectar' : 'Conectar'}
+                </button>
+              </div>
             </div>
-            {!integrations.calendarConnected && (
-              <p className="text-slate-600 text-xs mt-3 pl-9">
-                Ejecutá <code className="bg-white/5 px-1.5 py-0.5 rounded text-primary-400">npm run auth:google</code> en el proyecto del bot para autenticar.
-              </p>
-            )}
           </div>
 
           {/* Telegram */}
