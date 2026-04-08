@@ -18,3 +18,16 @@ env:
     secret: WEBHOOK_SECRET
     availability:
       - RUNTIME
+  - variable: GOOGLE_CALENDAR_CLIENT_ID
+    secret: GOOGLE_CALENDAR_CLIENT_ID
+    availability:
+      - RUNTIME
+  - variable: GOOGLE_CALENDAR_CLIENT_SECRET
+    secret: GOOGLE_CALENDAR_CLIENT_SECRET
+    availability:
+      - RUNTIME
+  - variable: NEXT_PUBLIC_APP_URL
+    value: "https://talos-coach--talos-agente-personal-agustin.us-east4.hosted.app"
+    availability:
+      - BUILD
+      - RUNTIME
