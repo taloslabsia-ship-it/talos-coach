@@ -4,42 +4,39 @@ import { db } from '@/lib/firebase';
 
 export const dynamic = 'force-dynamic';
 
+function redirect(path: string) {
+  const base = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+  return NextResponse.redirect(`${base}${path}`);
+}
+
 export async function GET(req: NextRequest) {
   try {
     const code = req.nextUrl.searchParams.get('code');
     const state = req.nextUrl.searchParams.get('state');
     const error = req.nextUrl.searchParams.get('error');
 
-    if (error) {
-      return NextResponse.redirect(`/configuracion?error=google_auth_denied`);
-    }
-
-    if (!code || !state) {
-      return NextResponse.redirect(`/configuracion?error=missing_params`);
-    }
+    if (error) return redirect('/configuracion?error=google_auth_denied');
+    if (!code || !state) return redirect('/configuracion?error=missing_params');
 
     const user = await getSessionUser();
-    if (!user || user.uid !== state) {
-      return NextResponse.redirect(`/configuracion?error=invalid_state`);
-    }
+    if (!user || user.uid !== state) return redirect('/configuracion?error=invalid_state');
 
     // Exchange code for tokens
-    const redirectUri = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/auth/google/callback`;
+    const base = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    const redirectUri = `${base}/api/auth/google/callback`;
     const tokenRes = await fetch('https://oauth2.googleapis.com/token', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: new URLSearchParams({
-        client_id: process.env.GOOGLE_OAUTH_CLIENT_ID || '',
-        client_secret: process.env.GOOGLE_OAUTH_CLIENT_SECRET || '',
+        client_id: process.env.GOOGLE_CALENDAR_CLIENT_ID || '',
+        client_secret: process.env.GOOGLE_CALENDAR_CLIENT_SECRET || '',
         code,
         grant_type: 'authorization_code',
         redirect_uri: redirectUri,
       }).toString(),
     });
 
-    if (!tokenRes.ok) {
-      return NextResponse.redirect(`/configuracion?error=token_exchange_failed`);
-    }
+    if (!tokenRes.ok) return redirect('/configuracion?error=token_exchange_failed');
 
     const tokens = await tokenRes.json();
 
@@ -53,9 +50,9 @@ export async function GET(req: NextRequest) {
       createdAt: new Date(),
     });
 
-    return NextResponse.redirect(`/configuracion?success=google_calendar_connected`);
+    return redirect('/configuracion?success=google_calendar_connected');
   } catch (error: any) {
     console.error('Google OAuth callback error:', error);
-    return NextResponse.redirect(`/configuracion?error=callback_error`);
+    return redirect('/configuracion?error=callback_error');
   }
 }

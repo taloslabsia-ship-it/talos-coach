@@ -9,7 +9,7 @@ export async function GET(req: NextRequest) {
     const redirectUri = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/auth/google/callback`;
 
     const params = new URLSearchParams({
-      client_id: process.env.GOOGLE_OAUTH_CLIENT_ID || '',
+      client_id: process.env.GOOGLE_CALENDAR_CLIENT_ID || process.env.GOOGLE_OAUTH_CLIENT_ID || '',
       redirect_uri: redirectUri,
       response_type: 'code',
       scope: 'https://www.googleapis.com/auth/calendar',
