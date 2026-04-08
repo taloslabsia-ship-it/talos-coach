@@ -1,18 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSessionUser } from '@/lib/session';
-import { getFirestore } from 'firebase-admin/firestore';
-import { initializeApp, cert, getApps } from 'firebase-admin/app';
-
-// Initialize Firebase Admin
-if (!getApps().length) {
-  initializeApp({
-    credential: cert({
-      projectId: process.env.FIREBASE_PROJECT_ID,
-      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-      privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-    }),
-  });
-}
+import { db } from '@/lib/firebase';
 
 export async function GET(req: NextRequest) {
   try {
@@ -54,7 +42,6 @@ export async function GET(req: NextRequest) {
     const tokens = await tokenRes.json();
 
     // Guardar en Firestore
-    const db = getFirestore();
     await db.collection('users').doc(user.uid).collection('config').doc('google_oauth').set({
       access_token: tokens.access_token,
       refresh_token: tokens.refresh_token,
