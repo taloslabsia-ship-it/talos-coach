@@ -4,9 +4,23 @@ import { db } from '@/lib/firebase';
 
 export const dynamic = 'force-dynamic';
 
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://talos-coach--talos-agente-personal-agustin.us-east4.hosted.app';
+
 function redirect(path: string) {
-  const base = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
-  return NextResponse.redirect(`${base}${path}`);
+  return NextResponse.redirect(`${APP_URL}${path}`);
+}
+
+// Lee las credenciales OAuth del config del usuario en Firestore
+async function getOAuthCredentials(uid: string) {
+  const doc = await db.collection('users').doc(uid).collection('config').doc('google_oauth_credentials').get();
+  if (doc.exists) {
+    return { clientId: doc.data()?.clientId, clientSecret: doc.data()?.clientSecret };
+  }
+  // Fallback a env vars
+  return {
+    clientId: process.env.GOOGLE_CALENDAR_CLIENT_ID || '213567039014-sr4rpp0gpbkpfhb21m4v8um89pc9l593.apps.googleusercontent.com',
+    clientSecret: process.env.GOOGLE_CALENDAR_CLIENT_SECRET || '',
+  };
 }
 
 export async function GET(req: NextRequest) {
@@ -21,15 +35,15 @@ export async function GET(req: NextRequest) {
     const user = await getSessionUser();
     if (!user || user.uid !== state) return redirect('/configuracion?error=invalid_state');
 
-    // Exchange code for tokens
-    const base = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
-    const redirectUri = `${base}/api/auth/google/callback`;
+    const creds = await getOAuthCredentials(user.uid);
+    const redirectUri = `${APP_URL}/api/auth/google/callback`;
+
     const tokenRes = await fetch('https://oauth2.googleapis.com/token', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: new URLSearchParams({
-        client_id: process.env.GOOGLE_CALENDAR_CLIENT_ID || '213567039014-sr4rpp0gpbkpfhb21m4v8um89pc9l593.apps.googleusercontent.com',
-        client_secret: process.env.GOOGLE_CALENDAR_CLIENT_SECRET || '',
+        client_id: creds.clientId,
+        client_secret: creds.clientSecret,
         code,
         grant_type: 'authorization_code',
         redirect_uri: redirectUri,
@@ -40,7 +54,6 @@ export async function GET(req: NextRequest) {
 
     const tokens = await tokenRes.json();
 
-    // Guardar en Firestore
     await db.collection('users').doc(user.uid).collection('config').doc('google_oauth').set({
       access_token: tokens.access_token,
       refresh_token: tokens.refresh_token,
