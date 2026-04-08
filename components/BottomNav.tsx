@@ -4,12 +4,14 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 const NAV = [
-  { href: '/',          label: 'Inicio',   icon: 'grid_view' },
-  { href: '/habits',    label: 'Hábitos',  icon: 'task_alt' },
-  { href: '/agenda',    label: 'Agenda',   icon: 'calendar_month' },
-  { href: '/diary',     label: 'Diario',   icon: 'edit_note' },
-  { href: '/notes',     label: 'Notas',    icon: 'sticky_note_2' },
-  { href: '/settings',  label: 'Config',   icon: 'settings' },
+  { href: '/',           label: 'Inicio',        icon: 'grid_view' },
+  { href: '/habits',     label: 'Hábitos',       icon: 'task_alt' },
+  { href: '/agenda',     label: 'Agenda',        icon: 'calendar_month' },
+  { href: '/diary',      label: 'Diario',        icon: 'edit_note' },
+  { href: '/reflexiones',label: 'Reflexiones',   icon: 'psychology' },
+  { href: '/stats',      label: 'Stats',         icon: 'monitoring' },
+  { href: '/notes',      label: 'Notas',         icon: 'sticky_note_2' },
+  { href: '/configuracion', label: 'Config',    icon: 'settings' },
 ];
 
 export function BottomNav() {
