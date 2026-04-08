@@ -1,4 +1,5 @@
 import { db, userDb, toISO } from '@/lib/firebase';
+import { requireActiveSession } from '@/lib/session';
 import Markdown from 'react-markdown';
 
 interface Reflection {
@@ -21,9 +22,8 @@ interface WeeklyAnalysis {
 
 export const dynamic = 'force-dynamic';
 
-async function getReflectionsData() {
+async function getReflectionsData(uid: string) {
   try {
-    const uid = process.env.TALOS_USER_UID || 'QXGkRXR6sZYJ5vYopNISy3wiSxN2';
     const udb = userDb(uid);
 
     // Obtener últimas 30 reflexiones
@@ -62,8 +62,8 @@ async function getReflectionsData() {
     });
 
     return { reflections, analyses };
-  } catch (err) {
-    console.error('Error obteniendo reflexiones:', err);
+  } catch (err: any) {
+    console.error('Error obteniendo reflexiones:', err?.message || err);
     return { reflections: [], analyses: [] };
   }
 }
@@ -79,7 +79,8 @@ function formatDate(dateStr: string): string {
 }
 
 export default async function ReflexionesPage() {
-  const { reflections, analyses } = await getReflectionsData();
+  const { uid } = await requireActiveSession();
+  const { reflections, analyses } = await getReflectionsData(uid);
 
   const morningReflections = reflections.filter(r => r.type === 'morning');
   const eveningReflections = reflections.filter(r => r.type === 'evening');

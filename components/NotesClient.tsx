@@ -149,8 +149,9 @@ export function NotesClient({ notes: initialNotes, uid }: Props) {
       <div className="flex gap-2">
         <button
           onClick={() => setShowCreateModal(true)}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl font-semibold text-sm transition-all"
+          className="relative z-10 flex items-center gap-2 px-4 py-2 rounded-xl font-semibold text-sm transition-all cursor-pointer"
           style={{ background: 'rgba(13,242,242,0.15)', border: '1px solid rgba(13,242,242,0.25)', color: '#0df2f2' }}
+          type="button"
         >
           <span className="material-symbols-outlined text-base">add</span>
           <span className="hidden sm:inline">Nueva</span>
