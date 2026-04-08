@@ -75,7 +75,7 @@ export function Sidebar({ user }: Props) {
       <div className="px-3 pt-4 border-t space-y-2" style={{ borderColor: 'rgba(13, 242, 242, 0.1)' }}>
         <ClearCacheButton />
         <p className="text-[10px] text-primary-500/40 text-center uppercase tracking-widest font-semibold">
-          Powered by TALOS AI
+          Powered by TALOS AI · v2
         </p>
       </div>
     </aside>
