@@ -1,6 +1,6 @@
 export const dynamic = 'force-dynamic';
 
-import { getUserProfile, getIntegrationsStatus } from '@/app/actions';
+import { getUserProfile, getIntegrationsStatus, getElevenLabsConfig } from '@/app/actions';
 import { SettingsClient } from '@/components/SettingsClient';
 import { requireSession } from '@/lib/session';
 
@@ -13,10 +13,11 @@ const DEFAULT_INTEGRATIONS = {
 };
 
 export default async function SettingsPage() {
-  await requireSession(); // redirect to /login if not authenticated
-  const [profile, integrations] = await Promise.all([
+  await requireSession();
+  const [profile, integrations, elevenLabs] = await Promise.all([
     getUserProfile().catch(() => null),
     getIntegrationsStatus().catch(() => DEFAULT_INTEGRATIONS),
+    getElevenLabsConfig().catch(() => null),
   ]);
-  return <SettingsClient profile={profile} integrations={integrations ?? DEFAULT_INTEGRATIONS} />;
+  return <SettingsClient profile={profile} integrations={integrations ?? DEFAULT_INTEGRATIONS} elevenLabs={elevenLabs} />;
 }

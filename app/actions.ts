@@ -68,6 +68,29 @@ export async function saveComercios(comercios: Comercio[]) {
   revalidatePath('/settings');
 }
 
+// ── ElevenLabs ────────────────────────────────────────────────────────────────
+
+export async function getElevenLabsConfig(): Promise<{ apiKey: string; voiceId: string } | null> {
+  const { uid } = await requireSession();
+  const udb = userDb(uid);
+  const doc = await udb.config('elevenlabs').get();
+  if (!doc.exists) return null;
+  return {
+    apiKey: doc.data()?.apiKey ?? '',
+    voiceId: doc.data()?.voiceId ?? '',
+  };
+}
+
+export async function saveElevenLabsConfig(apiKey: string, voiceId: string) {
+  const { uid } = await requireSession();
+  const udb = userDb(uid);
+  await udb.config('elevenlabs').set(
+    { apiKey, voiceId, updatedAt: FieldValue.serverTimestamp() },
+    { merge: true }
+  );
+  revalidatePath('/configuracion');
+}
+
 // ── Hábitos ───────────────────────────────────────────────────────────────────
 
 export async function toggleHabit(habitId: string, date: string, completed: boolean) {

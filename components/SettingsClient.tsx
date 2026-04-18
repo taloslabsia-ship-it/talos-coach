@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import { saveUserProfile, saveComercios } from '@/app/actions';
+import { saveUserProfile, saveComercios, saveElevenLabsConfig } from '@/app/actions';
 import type { UserProfile, BotPersonality, Comercio } from '@/lib/types';
 
 const PERSONALITIES: {
@@ -54,6 +54,7 @@ interface IntegrationsData {
 interface Props {
   profile: UserProfile | null;
   integrations: IntegrationsData;
+  elevenLabs?: { apiKey: string; voiceId: string } | null;
 }
 
 function StatusBadge({ ok, label }: { ok: boolean; label: string }) {
@@ -74,7 +75,7 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
   );
 }
 
-export function SettingsClient({ profile, integrations }: Props) {
+export function SettingsClient({ profile, integrations, elevenLabs }: Props) {
   // Perfil
   const [personality, setPersonality] = useState<BotPersonality>(profile?.botPersonality ?? 'equilibrado');
   const [name, setName] = useState(profile?.name ?? '');
@@ -82,6 +83,12 @@ export function SettingsClient({ profile, integrations }: Props) {
   const [quietEnd, setQuietEnd] = useState(profile?.quietEnd ?? '08:00');
   const [saved, setSaved] = useState(false);
   const [isPending, startTransition] = useTransition();
+
+  // ElevenLabs
+  const [elApiKey, setElApiKey] = useState(elevenLabs?.apiKey ?? '');
+  const [elVoiceId, setElVoiceId] = useState(elevenLabs?.voiceId ?? '');
+  const [elSaved, setElSaved] = useState(false);
+  const [elPending, startElTransition] = useTransition();
 
   // Comercios
   const [comercios, setComercios] = useState<Comercio[]>(integrations.comercios);
@@ -96,6 +103,14 @@ export function SettingsClient({ profile, integrations }: Props) {
       await saveUserProfile({ name, botPersonality: personality, quietStart, quietEnd, onboardingDone: true });
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
+    });
+  };
+
+  const handleSaveElevenLabs = () => {
+    startElTransition(async () => {
+      await saveElevenLabsConfig(elApiKey.trim(), elVoiceId.trim());
+      setElSaved(true);
+      setTimeout(() => setElSaved(false), 3000);
     });
   };
 
@@ -365,6 +380,48 @@ export function SettingsClient({ profile, integrations }: Props) {
             border: `1px solid ${comerciosSaved ? 'rgba(74,222,128,0.3)' : 'rgba(13,242,242,0.3)'}`,
           }}>
           {comerciosPending ? 'Guardando…' : comerciosSaved ? '✓ Comercios guardados' : 'Guardar comercios'}
+        </button>
+      </section>
+
+      {/* ── ELEVENLABS ── */}
+      <section className="space-y-4">
+        <div>
+          <SectionTitle>Voz del bot (ElevenLabs)</SectionTitle>
+          <p className="text-slate-500 text-xs mt-1">El bot responde con voz cuando le mandás un audio</p>
+        </div>
+
+        <div className="space-y-3">
+          <div>
+            <label className="text-slate-400 text-xs font-semibold mb-1 block">API Key</label>
+            <input
+              type="password"
+              value={elApiKey}
+              onChange={e => setElApiKey(e.target.value)}
+              placeholder="sk_…"
+              className="input-dark w-full font-mono text-sm"
+            />
+          </div>
+          <div>
+            <label className="text-slate-400 text-xs font-semibold mb-1 block">Voice ID</label>
+            <input
+              type="text"
+              value={elVoiceId}
+              onChange={e => setElVoiceId(e.target.value)}
+              placeholder="pNInz6obpgDQGcFmaJgB"
+              className="input-dark w-full font-mono text-sm"
+            />
+            <p className="text-slate-600 text-[10px] mt-1">Podés obtener el Voice ID desde elevenlabs.io → Voices</p>
+          </div>
+        </div>
+
+        <button onClick={handleSaveElevenLabs} disabled={elPending}
+          className="w-full py-3 rounded-2xl font-bold text-sm transition-all"
+          style={{
+            background: elSaved ? 'rgba(74,222,128,0.15)' : 'rgba(13,242,242,0.15)',
+            color: elSaved ? '#4ade80' : '#0df2f2',
+            border: `1px solid ${elSaved ? 'rgba(74,222,128,0.3)' : 'rgba(13,242,242,0.3)'}`,
+          }}>
+          {elPending ? 'Guardando…' : elSaved ? '✓ Voz guardada' : 'Guardar configuración de voz'}
         </button>
       </section>
 
