@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 // Rutas públicas — no requieren sesión
-const PUBLIC_PATHS = ['/login', '/api/auth', '/api/webhooks'];
+const PUBLIC_PATHS = ['/login', '/api/auth', '/api/webhooks', '/api/v1', '/api/notas', '/api/notes', '/api/diario', '/api/recordatorios', '/api/habitos', '/api/stats', '/api/reflections'];
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
